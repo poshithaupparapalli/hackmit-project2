@@ -62,6 +62,21 @@
   /* Shadow base — Figma shadows are all rgba(80,60,160,a) */
   --mia-shadow-rgb: 80 60 160;
 
+  /* Drifting background (side panel + dashboard). Saturated lilacs so the
+     purple reads clearly against the white it moves over; --mia-veil is the
+     white scrim laid on top. Kept in sync with extension/sidepanel.css. */
+  --mia-aurora-1: #b393ea;
+  --mia-aurora-2: #8f6fdd;
+  --mia-aurora-3: #c4a6f6;
+  --mia-aurora-4: #d9c2fb;
+  --mia-veil: rgba(255, 255, 255, 0.5);
+
+  /* Deeper members of the same family, for secondary text and links sitting
+     DIRECTLY on that gradient rather than on a white card. --mia-ink-soft is
+     only 4.75:1 on white, so it vanishes over the stronger purple. */
+  --mia-ink-soft-strong: #4a3a63;
+  --mia-lilac-strong: #52398f;
+
   /* Motion */
   --mia-ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
   --mia-ease-snap: cubic-bezier(0.4, 0, 0.2, 1);

@@ -1,21 +1,608 @@
+/* There was no global reset here: the UA's default 8px body margin was adding
+   16px of scroll to a page that otherwise fits the viewport exactly. */
+:root {
+  --rail-w: 72px;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  background: var(--mia-paper);
+}
+
 .dashboard {
-  min-height: 100vh;
-  background: linear-gradient(180deg, var(--mia-grad-mid), var(--mia-paper) 320px);
+  height: 100vh;
+  overflow: hidden;
+  padding-left: var(--rail-w);
+  background: var(--mia-paper);
   color: var(--mia-ink);
   font-family: var(--mia-font-body);
 }
 
-.dashboard__inner {
-  max-width: 880px;
-  margin: 0 auto;
-  padding: 32px 24px 80px;
+/* ── drifting lilac background ──────────────────────────────────────────
+   The same field as the extension side panel, scaled for a full page. Each
+   blob is its own composited layer: the blur rasterises once and only
+   `transform` animates, so a dashboard left open costs no repaints. The
+   veil on top keeps text at full contrast. */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--mia-paper);
 }
+
+.aurora span {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(90px);
+  will-change: transform;
+}
+
+.aurora span:nth-child(1) { width: 620px; height: 620px; top: -240px; left: -160px; background: var(--mia-aurora-1); opacity: 0.92; animation: mia-drift-a 15s ease-in-out infinite; }
+.aurora span:nth-child(2) { width: 500px; height: 500px; top: 3%; right: -200px; background: var(--mia-aurora-2); opacity: 0.6; animation: mia-drift-b 19s ease-in-out infinite; }
+.aurora span:nth-child(3) { width: 680px; height: 680px; bottom: -320px; left: -160px; background: var(--mia-aurora-3); opacity: 0.92; animation: mia-drift-c 23s ease-in-out infinite; }
+.aurora span:nth-child(4) { width: 460px; height: 460px; bottom: 5%; right: -170px; background: var(--mia-aurora-4); opacity: 0.88; animation: mia-drift-d 27s ease-in-out infinite; }
+
+.aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.2) 17%,
+    rgba(255, 255, 255, 0.44) 38%,
+    var(--mia-veil) 56%,
+    rgba(255, 255, 255, 0.42) 80%,
+    rgba(255, 255, 255, 0.08) 100%);
+}
+
+@keyframes mia-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  25% { transform: translate3d(620px, 170px, 0) scale(1.3); }
+  50% { transform: translate3d(880px, 520px, 0) scale(0.82); }
+  75% { transform: translate3d(240px, 430px, 0) scale(1.16); }
+}
+@keyframes mia-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.12); }
+  25% { transform: translate3d(-560px, 330px, 0) scale(0.78); }
+  50% { transform: translate3d(-900px, -80px, 0) scale(1.26); }
+  75% { transform: translate3d(-300px, -330px, 0) scale(0.94); }
+}
+@keyframes mia-drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  25% { transform: translate3d(520px, -380px, 0) scale(1.28); }
+  50% { transform: translate3d(1000px, -140px, 0) scale(0.8); }
+  75% { transform: translate3d(680px, -560px, 0) scale(1.14); }
+}
+@keyframes mia-drift-d {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.9); }
+  25% { transform: translate3d(-480px, 280px, 0) scale(1.24); }
+  50% { transform: translate3d(-860px, -200px, 0) scale(0.86); }
+  75% { transform: translate3d(-260px, -420px, 0) scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora span { animation: none; }
+}
+
+.dashboard__inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  /* This stylesheet has no global border-box, so say it here or the padding
+     lands outside the 100vh and the page scrolls by exactly that much. */
+  box-sizing: border-box;
+  height: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 20px 24px 22px;
+}
+
+/* ── layout ─────────────────────────────────────────────────────────────
+   The decision surface gets the wide column; status cards stack beside it,
+   so all four fit one viewport while collapsed. */
+.dashboard__grid {
+  display: grid;
+  flex: 1;
+  /* Nothing becomes unreachable on a very short viewport: the grid scrolls
+     rather than the page, and rather than being clipped. */
+  min-height: 0;
+  overflow: auto;
+  gap: 12px;
+  align-items: start;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  grid-template-areas:
+    "suggested integrations"
+    "suggested automations"
+    "suggested history"
+    "suggested settings";
+}
+
+.panel-card--suggested { grid-area: suggested; align-self: stretch; }
+.panel-card--integrations { grid-area: integrations; }
+.panel-card--automations { grid-area: automations; }
+.panel-card--history { grid-area: history; }
+.panel-card--settings { grid-area: settings; }
+
+@media (max-width: 760px) {
+  :root { --rail-w: 58px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard__header { flex-wrap: wrap; }
+}
+
+@media (max-width: 1000px) {
+  .dashboard__grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "suggested"
+      "integrations"
+      "automations"
+      "history"
+      "settings";
+  }
+
+  .panel-card--suggested { align-self: start; }
+}
+
+/* ── collapsible cards ──────────────────────────────────────────────── */
+
+.panel-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.panel-card__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  cursor: pointer;
+}
+
+.panel-card__heading {
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px;
+  margin: 0;
+  font-family: var(--mia-font-display);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.panel-card__toggle,
+.panel-card__static {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--mia-ink);
+  text-align: left;
+}
+
+.panel-card__toggle { width: 100%; cursor: pointer; }
+.panel-card__toggle:hover:not(:disabled) { transform: none; }
+/* The section heading with no toggle still aligns with the ones that have a
+   chevron, so titles line up down the column. */
+.panel-card__static { padding-left: 18px; }
+
+.panel-card__head-end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.panel-card__summary {
+  padding: 0 18px 13px;
+  cursor: pointer;
+}
+
+.panel-card__body { padding: 0 18px 18px; }
+.panel-card--suggested .panel-card__head { cursor: default; }
+
+.panel-card__expand {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--mia-ink-faint);
+  transition: color 0.15s;
+}
+
+.panel-card__head:hover .panel-card__expand,
+.panel-card__toggle:focus-visible .panel-card__expand {
+  color: var(--mia-lilac-strong);
+}
+
+/* The list card is the only one that grows with data, so it scrolls inside
+   itself rather than pushing the page past one screen. */
+.panel-card--suggested {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-card__body--scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* A bare line, not a boxed empty state — the default <p> margins here were
+   costing ~32px per card and pushing the last card past the fold. */
+.panel__empty--plain {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+/* ── centred popup ──────────────────────────────────────────────────── */
+
+.modal {
+  width: 100%;
+  max-width: min(580px, calc(100vw - 32px));
+  max-height: calc(100vh - 56px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.modal--wide { max-width: min(760px, calc(100vw - 32px)); }
+
+.modal::backdrop {
+  background: rgba(20, 16, 42, 0.44);
+  backdrop-filter: blur(3px);
+}
+
+.modal__card {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 56px);
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--mia-paper-raised);
+  box-shadow: 0 28px 90px rgb(var(--mia-shadow-rgb) / 0.32);
+  animation: mia-modal-in 0.2s var(--mia-ease-settle, ease);
+}
+
+@keyframes mia-modal-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal__card { animation: none; }
+}
+
+.modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  padding: 17px 20px 14px;
+  border-bottom: 1px solid var(--mia-border);
+}
+
+.modal__head h2 {
+  margin: 0;
+  font-family: var(--mia-font-display);
+  font-size: 19px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.modal__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--mia-ink-soft);
+  cursor: pointer;
+}
+
+.modal__close:hover:not(:disabled) {
+  transform: none;
+  background: var(--mia-lilac-pale);
+  color: var(--mia-ink);
+}
+
+.modal__body {
+  padding: 16px 20px 20px;
+  overflow-y: auto;
+}
+
+/* A lone suggestion in the popup IS the content, so it drops its tile
+   chrome. In the list popups the cards keep their borders to stay apart.
+   Scoped past `.card`, which is defined later and would otherwise win. */
+.modal__body > .suggestion-card--detail:only-child {
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.card-expand {
+  padding: 5px 7px;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.card-expand:hover:not(:disabled) {
+  transform: none;
+  background: var(--mia-lilac-pale);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.suggestion-card__summary { cursor: pointer; }
+
+.suggestion-card__top-end {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.suggestion-card__top-end .meta-row { margin-bottom: 0; }
+
+/* Integrations: one clamped status line while collapsed, full text once open. */
+.integration-row__text { min-width: 0; }
+.integration-row__name { font-weight: 500; }
+
+.integration-status {
+  font-size: 12px;
+  color: var(--mia-ink-faint);
+}
+
+.panel-card .integration-status {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.integration-status--error { color: #7a3030; }
+.integration-detail { margin: 0 0 8px; font-size: 13px; color: var(--mia-ink-soft); }
+.integration-detail--muted { color: var(--mia-ink-faint); }
+.integration-error { margin: 0; font-size: 13px; color: #7a3030; }
+
+/* ── left rail ──────────────────────────────────────────────────────── */
+
+.rail {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  width: var(--rail-w);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 0 18px;
+  background: var(--mia-action);
+  border-radius: 0 24px 24px 0;
+}
+
+.rail__logo {
+  display: block;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 14px;
+}
+
+.rail__group {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rail__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.52);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.rail__btn:hover:not(:disabled) {
+  transform: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.rail__btn--on {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.rail__btn--foot { margin-top: auto; }
+
+/* ── header ─────────────────────────────────────────────────────────── */
 
 .dashboard__header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 28px;
+  gap: 14px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.dashboard__mark {
+  display: block;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.dashboard__title {
+  flex: 1;
+  min-width: 0;
+}
+
+.state-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 8px 15px;
+  border-radius: 999px;
+  border: 1px solid var(--mia-border);
+  background: rgba(255, 255, 255, 0.74);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.state-pill__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mia-whimsy);
+}
+
+.state-pill--running .state-pill__dot,
+.state-pill--confirming .state-pill__dot,
+.state-pill--success .state-pill__dot { background: var(--mia-competent); }
+.state-pill--failure .state-pill__dot { background: var(--mia-caution); }
+
+/* ── stat tiles ─────────────────────────────────────────────────────── */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 11px 15px 12px;
+  border: 1px solid var(--mia-border);
+  border-radius: 16px;
+  background: var(--mia-paper-raised);
+  box-shadow: 0 6px 24px rgb(var(--mia-shadow-rgb) / 0.06);
+}
+
+.stat:nth-child(2) { background: linear-gradient(150deg, #ffffff 0%, var(--mia-lilac-pale) 100%); }
+.stat:nth-child(3) { background: linear-gradient(150deg, #ffffff 0%, var(--mia-paper-alt) 100%); }
+.stat:nth-child(4) { background: linear-gradient(150deg, #ffffff 0%, var(--mia-lilac-pale) 100%); }
+
+.stat__label {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--mia-ink-faint);
+}
+
+.stat__value {
+  font-family: var(--mia-font-display);
+  font-size: 23px;
+  line-height: 1.15;
+}
+
+.stat__note {
+  font-size: 11.5px;
+  color: var(--mia-ink-soft);
+}
+
+/* ── settings ───────────────────────────────────────────────────────── */
+
+.setting-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--mia-border);
+}
+
+.setting-row:first-child { padding-top: 0; }
+.setting-row:last-child { padding-bottom: 0; border-bottom: none; }
+.setting-row--stacked { display: block; }
+
+.setting-row__name {
+  font-weight: 500;
+  font-size: 13.5px;
+}
+
+.setting-row__note {
+  margin: 3px 0 0;
+  font-size: 12px;
+  color: var(--mia-ink-soft);
+}
+
+.setting-row__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.service-list {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 7px 12px;
+  align-items: center;
+  margin: 10px 0 8px;
+  font-size: 12px;
+}
+
+.service-list dt { color: var(--mia-ink-soft); }
+
+.service-list dd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0;
+  min-width: 0;
+}
+
+code {
+  font-size: 11.5px;
+  background: var(--mia-paper-alt);
+  padding: 2px 6px;
+  border-radius: 6px;
+  overflow-wrap: anywhere;
 }
 
 .dashboard__header h1 {
@@ -26,7 +613,7 @@
 
 .dashboard__header p {
   margin: 2px 0 0;
-  color: var(--mia-ink-soft);
+  color: var(--mia-ink-soft-strong);
   font-size: 14px;
 }
 
@@ -67,10 +654,6 @@
   box-shadow: 0 6px 24px rgb(var(--mia-shadow-rgb) / 0.06);
 }
 
-section.panel {
-  margin-bottom: 24px;
-}
-
 .panel__head {
   display: flex;
   align-items: baseline;
@@ -93,8 +676,9 @@ section.panel {
 
 .panel__empty {
   color: var(--mia-ink-soft);
-  font-size: 14px;
-  padding: 16px 20px;
+  font-size: 13.5px;
+  margin: 0;
+  padding: 12px 14px;
   border: 1px dashed var(--mia-border);
   border-radius: 14px;
   background: var(--mia-paper-alt);
