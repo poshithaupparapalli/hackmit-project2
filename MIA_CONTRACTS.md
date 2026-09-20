@@ -1205,6 +1205,72 @@ This is non-negotiable demo insurance.
 
 ---
 
+## B7. Workflow Registry
+
+**Owner:** Poshitha (agent tools + statuses). Kathy tags each suggestion with a
+`workflowKey` from this table (or `null` if no matching workflow exists).
+
+MIA is designed to support **multiple** agent workflows, not just one. Each row
+below is a distinct executable workflow. Adding a workflow means adding its
+tool(s) on the agent side and (for a new key) extending the controlled
+`WorkflowKey` set — see the coordination note below.
+
+`status` values: `planned` | `building` | `working`.
+
+| Priority | workflowKey | Description | Scopes / auth | Status |
+|----------|-------------|-------------|---------------|--------|
+| 1 | `gmail_to_sheet` | Read a receipt/expense email, append a row to a Sheet. | `gmail.readonly` + `spreadsheets` | building |
+| 2 | `email_to_calendar` | Read an email, create a Google Calendar event from it. | `gmail.readonly` + `calendar.events` | planned |
+| 3 | `inbox_triage` | Read unread emails, categorize, draft replies. Draft only; **sending requires approval via B5**. | `gmail.readonly` (+ `gmail.compose` if drafting) | planned |
+| 4 | `slack_post` | Post / summarize a message to Slack. | Slack OAuth (separate from Google) | planned |
+| 5 | `notion_file` | File notes / tasks into a Notion database. | Notion token | planned |
+| 6 | `email_to_calendar_to_slack` | Multi-step chain across apps (email → calendar → Slack). | Google + Slack | planned |
+
+Priority 6 (multi-app chain) is only attempted **after** at least one single-app
+workflow is fully working.
+
+### The run contract is workflow-agnostic
+
+The run contract (**B4** — `POST /v1/workflows/:workflowKey/run`,
+`GET /v1/workflows/runs/:runId`, `POST /v1/workflows/runs/:runId/approve`)
+already supports **all** of these workflows as-is. It accepts a `workflowKey`
+and returns the frozen run shape `{ runId, workflowKey, status, steps[], result,
+error }`. Nothing about it is specific to one workflow.
+
+Therefore, adding a workflow **does not change**:
+
+```text
+the Chrome extension
+the backend detection pipeline
+the web frontend
+```
+
+Each new workflow needs only:
+
+```text
+1. its own hand-built tool(s) on the agent side
+2. a workflowKey tag on the suggestion (Kathy sets it; null if no match)
+```
+
+**Coordination note:** the executable set is still controlled (A12). The
+`WorkflowKey` literal currently allows only `gmail_to_sheet`. Promoting a
+registry row from `planned` to `building`/`working` requires Kathy to add that
+key to the `WorkflowKey` literal + analyst mapping. This is an additive change,
+but per the freeze rule it must be pinged to both sides — it is not silent.
+
+### BUILD DISCIPLINE (non-negotiable)
+
+```text
+Build workflows in strict priority order.
+Each workflow must fully work end-to-end before the next is started.
+A workflow that is not yet `working` is a VISION-SLIDE item, not a demo item.
+```
+
+The demo shows the **working** workflows plus the agent choosing the right tool
+per detected pattern. It never shows a half-built workflow as if it were real.
+
+---
+
 # PART C — FRONTEND / EXTENSION UI
 
 ## C1. Extension side panel
@@ -1596,6 +1662,21 @@ Frontend displays:
 ✓ Adding row
 ✓ Complete
 ```
+
+### Demo success condition (multi-workflow)
+
+The demo shows **however many workflows are in `working` status** in the
+Workflow Registry (**B7**), with the agent **selecting the right tool per
+detected pattern** — not a single hardcoded path. With one working workflow the
+demo is one flow; as more reach `working`, the demo grows to show the agent
+choosing between them.
+
+The approval boundary (**B5**) stays visible throughout: any unexpected
+consequential action pauses with `status = "needs_approval"` and waits for the
+user, regardless of which workflow is running.
+
+Not-yet-`working` registry rows are vision-slide items only (B7 build
+discipline); they are never shown as if they execute.
 
 ---
 
