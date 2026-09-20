@@ -44,6 +44,12 @@ async function handle(message, sender) {
     const tab = await chrome.tabs.get(sender.tab.id);
     return observe(message.observation, { url: sender.url, topUrl: tab.url, title: tab.title || '', tabId: tab.id, frameId: sender.frameId, incognito: tab.incognito });
   }
+  if (message?.kind === 'sidepanel:open' && sender.tab) {
+    // Only the worker can open the side panel; content scripts have no
+    // sidePanel API. Must stay above the isPanel() guard.
+    await chrome.sidePanel.open({ windowId: sender.tab.windowId });
+    return true;
+  }
   if (!isPanel(sender)) throw new Error('Unavailable.');
   if (message.kind === 'panel:state') {
     const state = await coordinator.snapshot();
