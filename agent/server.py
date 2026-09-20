@@ -6,7 +6,26 @@ and mirror MIA_CONTRACTS.md exactly:
 
     POST /v1/workflows/{workflowKey}/run   body {suggestionId}   -> { runId }
     GET  /v1/workflows/runs/{runId}                              -> WorkflowRun
+    GET  /v1/workflows/runs?limit=50                             -> [WorkflowRun] (history)
     POST /v1/workflows/runs/{runId}/approve  ?decision=approve|cancel -> WorkflowRun
+
+Plus the Google OAuth web flow the dashboard's "Integrations" panel drives —
+the browser-based counterpart to `python -m agent.oauth_flow`'s CLI flow:
+
+    GET /v1/auth/google/status    -> { configured, connected }
+    GET /v1/auth/google/start     -> 302 to Google's consent screen
+    GET /v1/auth/google/callback  -> exchanges ?code=..., then 302 back to the dashboard
+
+    NOTE: config.REDIRECT_URI must match wherever this app actually runs. It
+    defaults to http://localhost:8000/... (see agent/config.py); if you serve
+    this app on its usual port 8010 instead, set MIA_OAUTH_REDIRECT_URI to
+    match and add that exact URI to the OAuth client's registered redirects
+    in Google Cloud Console (you can register more than one).
+
+Plus autorun.py's background loop (started in lifespan, below): once a
+workflow is ACCEPTED, it runs on its own when new matching input shows up —
+no manual Run click needed. See autorun.py's docstring for exactly what that
+does and doesn't change; set MIA_AUTO_RUN_ENABLED=false to turn it off.
 
 Run:
     source agent/.venv/bin/activate
@@ -15,16 +34,20 @@ Run:
 """
 from __future__ import annotations
 
+import asyncio
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
-from . import runner
+from . import autorun, config, oauth_flow, runner
 from .runner import WorkflowRun
 
-app = FastAPI(title="MIA Agent (execution)", version="1.0")
+# Where the dashboard lives — the OAuth callback redirects back here.
+DASHBOARD_URL = os.getenv("MIA_DASHBOARD_URL", "http://localhost:5173/")
 
 # Auto-discover and register workflow modules in agent/workflows/ on startup, so
 # launching normally (uvicorn agent.server:app) picks up every workflow —
@@ -32,6 +55,16 @@ app = FastAPI(title="MIA Agent (execution)", version="1.0")
 _REGISTERED = runner.discover_workflows()
 print(f"[agent] workflows available: {sorted(runner.WORKFLOWS)} "
       f"(discovered from agent/workflows/: {_REGISTERED})")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(autorun.loop())
+    yield
+    task.cancel()
+
+
+app = FastAPI(title="MIA Agent (execution)", version="1.0", lifespan=lifespan)
 
 # Ryan's frontend calls this directly; wide-open CORS is fine for the demo.
 app.add_middleware(
@@ -59,6 +92,11 @@ def run_workflow(workflow_key: str, body: RunRequest) -> RunAccepted:
     return RunAccepted(runId=run_id)
 
 
+@app.get("/v1/workflows/runs", response_model=list[WorkflowRun])
+def list_runs(limit: int = 50) -> list[WorkflowRun]:
+    return runner.list_runs(limit=limit)
+
+
 @app.get("/v1/workflows/runs/{run_id}", response_model=WorkflowRun)
 def get_run(run_id: str) -> WorkflowRun:
     run = runner.get_run(run_id)
@@ -75,9 +113,40 @@ def approve_run(run_id: str, decision: str = "approve") -> WorkflowRun:
     return run
 
 
+@app.get("/v1/auth/google/status")
+def google_auth_status() -> dict:
+    configured = oauth_flow.is_configured()
+    return {"configured": configured, "connected": configured and oauth_flow.is_connected()}
+
+
+@app.get("/v1/auth/google/start")
+def google_auth_start() -> RedirectResponse:
+    try:
+        auth_url, _state = oauth_flow.get_authorization_url()
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+    return RedirectResponse(auth_url)
+
+
+@app.get("/v1/auth/google/callback")
+def google_auth_callback(code: str | None = None, error: str | None = None) -> RedirectResponse:
+    if error or not code:
+        return RedirectResponse(f"{DASHBOARD_URL}?connected=0&error={error or 'missing_code'}")
+    try:
+        oauth_flow.exchange_code(code)
+    except Exception as exc:  # noqa: BLE001 — surface any failure to the dashboard, never crash
+        return RedirectResponse(f"{DASHBOARD_URL}?connected=0&error={type(exc).__name__}")
+    return RedirectResponse(f"{DASHBOARD_URL}?connected=1")
+
+
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True, "workflows": list(runner.WORKFLOWS.keys())}
+    return {
+        "ok": True,
+        "workflows": list(runner.WORKFLOWS.keys()),
+        "autoRunEnabled": config.AUTO_RUN_ENABLED,
+        "autoRunWorkflows": list(runner.TRIGGER_QUERIES.keys()),
+    }
 
 
 if __name__ == "__main__":

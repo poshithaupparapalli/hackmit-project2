@@ -1,17 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+// Dashboard / workflows page only. The extension has its own UI (a side
+// panel, see extension/sidepanel.html) — there is no toolbar popup here.
 export default defineConfig({
   plugins: [react()],
-  build: {
-    rollupOptions: {
-      input: {
-        // Dashboard / workflows page.
-        main: 'index.html',
-        // Extension toolbar popup — Anika points default_popup at the built
-        // popup.html. No manifest.json is written from this repo.
-        popup: 'popup.html',
-      },
-    },
-  },
 });

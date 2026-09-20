@@ -163,6 +163,7 @@ def execute(ctx: runner.RunContext, suggestion_id: str) -> dict:
 def register() -> None:
     """Add only our key; preserve gmail_to_sheet's dispatch and implementation."""
     runner.WORKFLOWS[WORKFLOW_KEY] = (list(STEP_LABELS), execute)
+    runner.TRIGGER_QUERIES[WORKFLOW_KEY] = lambda: os.getenv("MIA_CALENDAR_GMAIL_QUERY") or config.GMAIL_TEST_QUERY
 
 
 register()

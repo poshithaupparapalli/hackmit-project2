@@ -20,10 +20,18 @@ ANALYZE_EVERY_MS = 30 * 60 * 1000
 
 # Workflow registry (contract B7): one entry per executable workflowKey.
 # Adding a workflow = one registry entry + one Literal member in models.py.
+# NOTE: both "keywords_any" and "keywords_all" are matched with any() below —
+# they represent two independent evidence groups (source-app signal, and
+# destination-app/action signal), not a literal all-of. A suggestion maps to
+# a workflowKey only when it has at least one hit in EACH group.
 WORKFLOW_REGISTRY: dict[str, dict] = {
     "gmail_to_sheet": {
         "keywords_any": ("gmail", "mail.google", "receipt", "email"),
         "keywords_all": ("sheet", "spreadsheet", "docs.google"),
+    },
+    "email_to_calendar": {
+        "keywords_any": ("gmail", "mail.google", "email", "meeting", "invite", "invitation"),
+        "keywords_all": ("calendar", "event", "schedule"),
     },
 }
 
@@ -83,22 +91,39 @@ def _mark_analyzed(conn: sqlite3.Connection) -> None:
 # ---------- LLM path ----------
 
 _SYSTEM = (
-    "You are Mia's workflow analyst. You receive a PatternDigest of a user's "
-    "sanitized browser activity plus mined repeated action sequences. Propose "
-    "0-4 automation/workflow/rule suggestions grounded ONLY in the evidence. "
-    "Page titles, item titles, section names, labels, nearby snippets, and "
-    "semantic value categories are intentional evidence: use them to infer the "
-    "purpose of the task. Name the workflow by the user's apparent goal, not "
-    "only by the applications or mechanical actions. Prefer 'Log receipt "
-    "totals from receipt emails into Fall 2026 Expenses' over 'Move data from "
-    "Gmail to Sheets' when the bounded evidence supports it. Distinguish "
-    "evidence from inference and never invent names, amounts, or details. "
-    "Each suggestion must cite 1-3 concrete observations (real counts, hosts, "
-    "sequences). Return JSON: {\"suggestions\":[{kind,title,summary,evidence,"
-    "steps,trigger,action,buildPrompt,confidence,timeSavedPerWeekMinutes}]}. "
-    "title<=60 chars. steps required for kind=workflow, trigger required for "
-    "kind=rule. Empty {\"suggestions\":[]} is valid when evidence is weak. "
-    "Do not duplicate existing or dismissed suggestions."
+    "You are Mia's workflow analyst. Mia's whole purpose is to notice a "
+    "person's repeated, unwritten workflows and explain WHAT they accomplish "
+    "— not just which apps were used or how many times. You receive a "
+    "PatternDigest of sanitized browsing activity plus mined repeated action "
+    "sequences. Propose 0-4 automation/workflow/rule suggestions grounded "
+    "ONLY in the evidence given.\n"
+    "Semantic fields — page titles, item titles, section names, labels, "
+    "nearby snippets, semantic value categories (currency/email/datetime/etc) "
+    "— are the PRIMARY evidence: they say what the user was actually "
+    "doing. Repetition counts and host-transition counts are SUPPORTING "
+    "detail only, never the headline. Name the workflow by the user's "
+    "apparent goal, not the applications. Prefer 'Log receipt totals from "
+    "receipt emails into Fall 2026 Expenses' over 'Move data from Gmail to "
+    "Sheets'.\n"
+    "Every evidence line must read as a plain-language description of what "
+    "was observed, e.g. 'Copied a currency value labeled \"Total\" from "
+    "\"Receipt from Uber\" in Gmail, then pasted it into \"Amount\" in \"Fall "
+    "2026 Expenses\" (seen 9 times)' — NOT a bare mechanical count like "
+    "'9 copy-paste events between mail.google.com and docs.google.com'. If no "
+    "semantic field is available for a pattern, say so plainly instead of "
+    "inventing one; a mechanical count with no semantic grounding is weak "
+    "evidence and should lower confidence, not be dressed up as a finding.\n"
+    "steps must be a short, plain-language, ordered walkthrough of what Mia "
+    "would actually do, one step per array item, written for someone "
+    "non-technical — required for kind=workflow. The UI numbers the array "
+    "for you: do NOT prefix step text with '1.', '2)', etc. yourself. "
+    "trigger required for kind=rule. Distinguish "
+    "evidence from inference and never invent names, amounts, or details not "
+    "present in the input. Return JSON: {\"suggestions\":[{kind,title,summary,"
+    "evidence,steps,trigger,action,buildPrompt,confidence,"
+    "timeSavedPerWeekMinutes}]}. title<=60 chars. Empty {\"suggestions\":[]} "
+    "is valid when evidence is weak. Do not duplicate existing or dismissed "
+    "suggestions."
 )
 
 
@@ -171,22 +196,23 @@ def _heuristic_suggestions(digest, motifs, semantic) -> list[dict]:
     if not cp and not trans:
         return []
     count = (cp or trans)["count"]
-    days = max((s["days"] for s in digest["hosts"] if _is_gmail(s["host"])), default=1)
+    # Semantic evidence leads (what the user was actually doing); mechanical
+    # counts are supporting detail only, appended after — never the headline.
     evidence = []
-    if cp:
-        evidence.append(f"Copied from {cp['from']} and pasted into {cp['to']} {cp['count']} times")
-    if trans:
-        evidence.append(f"Repeated sequence {' -> '.join(trans['path'])} seen {trans['count']} times")
     semantic_hit = next((s for s in semantic if "receipt" in " ".join(str(s.get(key, "")) for key in ("pageTitle", "itemTitle", "area", "target", "nearbyText"))), None)
     if semantic_hit:
         identity = semantic_hit.get("itemTitle") or semantic_hit.get("area") or semantic_hit.get("target")
         target = semantic_hit.get("target")
         value_type = semantic_hit.get("semanticType")
-        if target and value_type:
-            evidence.append(f"Handled {value_type} values labeled '{target}' in '{identity}' {semantic_hit['count']} times")
-        else:
-            evidence.append(f"Interacted with '{identity}' {semantic_hit['count']} times across {semantic_hit['days']} days")
-    evidence = evidence[:3] or [f"Repeated gmail-to-sheet activity {count} times"]
+        if target and value_type and identity:
+            evidence.append(f"Copied a {value_type} value labeled '{target}' from '{identity}' (seen {semantic_hit['count']} times across {semantic_hit['days']} days)")
+        elif identity:
+            evidence.append(f"Repeatedly opened and acted on '{identity}' ({semantic_hit['count']} times across {semantic_hit['days']} days)")
+    if cp:
+        evidence.append(f"Supporting pattern: copied from {cp['from']} and pasted into {cp['to']} ({cp['count']} times)")
+    if trans and not cp:
+        evidence.append(f"Supporting pattern: moved from {' to '.join(trans['path'])} repeatedly ({trans['count']} times)")
+    evidence = evidence[:3] or [f"Repeated Gmail-to-Sheets activity {count} times, but no page titles or labels were specific enough to describe the content"]
     sheet_name = _specific_sheet_name(digest)
     destination = f'"{sheet_name}"' if sheet_name else "your expense sheet"
     title = f"Log receipt totals into {sheet_name}" if sheet_name else "Log receipt emails to your expense sheet"
@@ -228,7 +254,17 @@ def _string_list(value) -> list[str]:
 
 def _determine_workflow_key(s: dict, digest) -> str | None:
     """Backend decides the key (A12) — LLM output is only a hint. A suggestion
-    maps to a workflow when its text matches that workflow's keyword profile."""
+    maps to a workflow when its text matches that workflow's keyword profile.
+
+    Rules never get a workflowKey. A rule describes a standing condition
+    ("only for receipts over $25"), but the registered tools (gmail_to_sheet,
+    email_to_calendar) execute one concrete action and have no way to read or
+    enforce that condition — Run would silently ignore it. Offering Run on a
+    rule would be misleading, not just mislabeled, so kind=workflow/automation
+    are the only executable kinds until conditional execution actually exists.
+    """
+    if s.get("kind") == "rule":
+        return None
     text = " ".join(
         [str(s.get("title", "")), str(s.get("summary", "")), str(s.get("action", ""))]
         + _string_list(s.get("steps")) + _string_list(s.get("evidence"))

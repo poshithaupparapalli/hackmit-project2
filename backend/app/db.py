@@ -94,6 +94,15 @@ def init_schema(conn: sqlite3.Connection) -> None:
             created_at    INTEGER NOT NULL
         );
 
+        CREATE TABLE IF NOT EXISTS suggestion_chat (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            suggestion_id TEXT NOT NULL,
+            role          TEXT NOT NULL,
+            content       TEXT NOT NULL,
+            created_at    INTEGER NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_chat_suggestion ON suggestion_chat(suggestion_id, created_at);
+
         CREATE TABLE IF NOT EXISTS meta (
             key   TEXT PRIMARY KEY,
             value TEXT

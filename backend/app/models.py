@@ -64,7 +64,7 @@ class InstallResponse(BaseModel):
     installToken: str
 
 
-WorkflowKey = Literal["gmail_to_sheet"]
+WorkflowKey = Literal["gmail_to_sheet", "email_to_calendar"]
 SuggestionKind = Literal["workflow", "automation", "rule"]
 SuggestionStatus = Literal["proposed", "accepted", "dismissed", "built"]
 
@@ -94,6 +94,21 @@ class SuggestionPatchRequest(BaseModel):
 class SuggestionFeedbackRequest(BaseModel):
     decision: Literal["accept", "dismiss", "edit"]
     userEdits: Optional[str] = Field(default=None, max_length=2000)
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "mia"]
+    content: str
+    createdAt: int
+
+
+class ChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=2000)
+
+
+class ChatResponse(BaseModel):
+    reply: ChatMessage
+    messages: List[ChatMessage]
 
 
 class StatusResponse(BaseModel):

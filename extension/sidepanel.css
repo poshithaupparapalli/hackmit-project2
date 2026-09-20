@@ -1,2 +1,148 @@
-:root{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#263a35;background:#f7f8f4;font-size:14px;line-height:1.5;color-scheme:light}*{box-sizing:border-box}body{margin:0;min-width:280px}header{position:sticky;top:0;background:#f7f8f4f5;backdrop-filter:blur(10px);padding:22px 20px 16px;border-bottom:1px solid #dde5dc;z-index:2}.brand{display:flex;gap:12px;align-items:center}.mark{display:grid;place-items:center;width:42px;height:42px;background:#dfeada;border-radius:15px;font:italic 34px Georgia;color:#32563d}h1{font-size:25px;line-height:1;margin:0 0 5px;letter-spacing:-1px}.brand p{font-size:11px;color:#6a776d;margin:0}.observation{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:12px}#observation-status{font-size:13px;font-weight:600}#observation-status::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#3d7a50;margin-right:8px}#observation-status.paused::before{background:#a88036}main{padding:0 20px}section{padding:23px 0;border-bottom:1px solid #e0e6dc}h2{font-size:15px;margin:0 0 12px;font-weight:650}h3{font-size:13px;margin:18px 0 8px}.section-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.section-heading h2{margin:0}.eyebrow{font-size:10px;color:#6b786f;text-transform:uppercase;letter-spacing:.6px}button,input,textarea{font:inherit}button{border:1px solid #cad7cb;background:#fff;color:#324d3c;border-radius:8px;padding:7px 12px;cursor:pointer;white-space:nowrap}button:hover{background:#edf3e9}button:disabled{opacity:.5;cursor:wait}button.primary{background:#365e43;color:#fff;border-color:#365e43}button.primary:hover{background:#284b34}button.quiet{border:0;background:transparent;font-size:12px;padding:4px}button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid #4b7f59;outline-offset:3px}.card{background:white;border:1px solid #dce5d9;border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:0 3px 10px #304b3105}.card h3{font-size:20px;line-height:1.3;font-weight:550;letter-spacing:-.4px;margin:8px 0 12px}.card p{margin:10px 0;color:#596b5d;font-size:13px}.card ul,.card ol{padding-left:20px;font-size:13px;color:#536455}.card li{margin:6px 0}.card .confidence{font-size:11px;color:#72806d;margin-top:16px}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}.actions button{font-size:12px;padding:7px 11px}.card form{margin-top:12px}.card textarea{width:100%;min-height:90px;resize:vertical}.card label{font-size:12px}.notice{background:#eee8d7;color:#756132;padding:10px 12px;border-radius:8px;font-size:12px}.muted,.empty{font-size:13px;color:#6d796f}.footnote{font-size:11px;color:#798176}.activity{padding:0;margin:0;list-style:none}.activity li{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #edf0e9;font-size:12px}.activity time{color:#869081;flex:0 0 42px;font-size:11px}.activity span{overflow-wrap:anywhere}.domains{list-style:none;margin:0 0 14px;padding:0}.domains li{display:flex;align-items:center;justify-content:space-between;font-size:12px;gap:6px;padding:5px 0}.domains span{overflow-wrap:anywhere}.domains button{padding:2px 7px;border:0;background:transparent;font-size:17px;color:#7c8977}label{display:block;color:#687761;font-size:11px;margin-bottom:6px}.input-row{display:flex;gap:7px}input,textarea{background:#fff;border:1px solid #d7e0d3;border-radius:8px;padding:9px;min-width:0}input{width:100%;font-size:12px}details{padding:15px 0;font-size:12px;color:#66765f}summary{cursor:pointer}dl{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px}dd{margin:0;overflow-wrap:anywhere}pre{max-height:260px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px;background:#edf1e8;padding:10px}footer{text-align:center;font-size:12px;color:#567052;padding:25px 18px}footer span{color:#86917e;font-size:10px}#message{border-left:3px solid #648456;padding:8px 10px;background:#eaf0e5;font-size:12px;overflow-wrap:anywhere}#message.error{border-color:#a55548;background:#f7eae5;color:#894b3e}[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
-:focus{scroll-margin-top:160px}.activity time{flex-basis:56px;white-space:nowrap}.card h3{overflow-wrap:anywhere}
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Mia design tokens — kept in sync with src/components/mia/mia-theme.css by
+   value (extension pages can't import across the repo, so this is a copy). */
+:root {
+  --mia-font-display: 'Fraunces', Georgia, 'Iowan Old Style', serif;
+  --mia-font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --mia-ink: #13102a;
+  --mia-ink-soft: #7a6898;
+  --mia-ink-faint: #b0a4cc;
+
+  --mia-paper: #fcfaff;
+  --mia-paper-alt: #f5eefb;
+  --mia-paper-raised: #ffffff;
+  --mia-border: rgba(180, 165, 220, 0.16);
+
+  --mia-whimsy: #b8a8dc;
+  --mia-whimsy-soft: #d8cef4;
+  --mia-competent: #7c5cbf;
+  --mia-competent-soft: #a888d0;
+  --mia-caution: #a899c8;
+  --mia-caution-soft: #ccc0e0;
+
+  --mia-lilac: #8b6cc8;
+  --mia-lilac-light: #c4aee8;
+  --mia-lilac-pale: #ede8f8;
+
+  --mia-action: #1a1630;
+  --mia-action-fg: #ffffff;
+
+  --mia-grad-mid: #f3ebfb;
+  --mia-shadow-rgb: 80 60 160;
+
+  font-family: var(--mia-font-body);
+  color: var(--mia-ink);
+  background: var(--mia-paper);
+  font-size: 14px;
+  line-height: 1.5;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 280px; background: linear-gradient(180deg, var(--mia-grad-mid), var(--mia-paper) 240px); }
+
+header {
+  position: sticky; top: 0;
+  background: color-mix(in srgb, var(--mia-paper) 90%, transparent);
+  backdrop-filter: blur(10px);
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--mia-border);
+  z-index: 2;
+}
+.brand { display: flex; gap: 12px; align-items: center; }
+
+/* The shared Mia mark — same shape/palette as MiaAvatar.tsx's idle frame,
+   as a plain CSS/SVG mark so the extension (no React/framer-motion here)
+   still carries the same logo as the dashboard. */
+.mia-logo { position: relative; display: inline-flex; flex-shrink: 0; animation: mia-breathe 3.4s ease-in-out infinite; }
+.mia-logo-body { fill: var(--mia-whimsy); transition: fill 0.3s; }
+.mia-logo-eye { fill: var(--mia-ink); }
+.mia-logo-mouth { stroke: var(--mia-ink); stroke-width: 3; fill: none; stroke-linecap: round; }
+.mia-logo.paused { animation: none; filter: grayscale(0.6) opacity(0.65); }
+.mia-logo-badge {
+  position: absolute; top: -1px; right: -1px;
+  width: 11px; height: 11px; border-radius: 50%;
+  background: var(--mia-competent);
+  border: 2px solid var(--mia-paper-raised);
+}
+@keyframes mia-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+h1 { font-family: var(--mia-font-display); font-size: 22px; line-height: 1; margin: 0 0 4px; }
+.brand p { font-size: 11px; color: var(--mia-ink-soft); margin: 0; }
+.observation { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 12px; }
+#observation-status { font-size: 13px; font-weight: 600; color: var(--mia-ink); }
+#observation-status::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--mia-competent); margin-right: 8px; }
+#observation-status.paused::before { background: var(--mia-caution); }
+.dashboard-link { display: inline-block; margin-top: 10px; font-size: 12px; color: var(--mia-lilac); text-decoration: none; }
+.dashboard-link:hover { text-decoration: underline; }
+
+main { padding: 0 20px; }
+section { padding: 22px 0; border-bottom: 1px solid var(--mia-border); }
+h2 { font-family: var(--mia-font-display); font-size: 16px; margin: 0 0 12px; font-weight: 600; }
+h3 { font-size: 13px; margin: 18px 0 8px; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.section-heading h2 { margin: 0; }
+.eyebrow { font-size: 10px; color: var(--mia-ink-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+
+button, input, textarea { font: inherit; font-family: var(--mia-font-body); }
+button {
+  border: 1px solid var(--mia-border);
+  background: var(--mia-paper-raised);
+  color: var(--mia-ink);
+  border-radius: 10px;
+  padding: 7px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.1s var(--mia-ease-snap, ease), background 0.15s;
+}
+button:hover { transform: translateY(-1px); }
+button:disabled { opacity: 0.5; cursor: wait; transform: none; }
+button.primary { background: var(--mia-action); color: var(--mia-action-fg); border-color: var(--mia-action); }
+button.quiet, a.quiet { border: 0; background: transparent; font-size: 12px; padding: 4px; color: var(--mia-ink-soft); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--mia-lilac); outline-offset: 3px; }
+
+.card { background: var(--mia-paper-raised); border: 1px solid var(--mia-border); border-radius: 16px; padding: 18px; margin-bottom: 12px; box-shadow: 0 6px 20px rgb(var(--mia-shadow-rgb) / 0.06); }
+.card h3 { font-family: var(--mia-font-display); font-size: 18px; line-height: 1.3; font-weight: 600; margin: 8px 0 10px; overflow-wrap: anywhere; }
+.card p { margin: 10px 0; color: var(--mia-ink-soft); font-size: 13px; }
+.card ul, .card ol { padding-left: 20px; font-size: 13px; color: var(--mia-ink-soft); }
+.card li { margin: 6px 0; }
+.card .confidence { font-size: 11px; color: var(--mia-ink-faint); margin-top: 16px; }
+.card-links { margin-top: 10px; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
+.actions button { font-size: 12px; padding: 7px 11px; }
+.card form { margin-top: 12px; }
+.card textarea { width: 100%; min-height: 90px; resize: vertical; }
+.card label { font-size: 12px; }
+
+.tag { display: inline-flex; align-items: center; font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--mia-lilac-pale); color: var(--mia-lilac); }
+
+.notice { background: var(--mia-lilac-pale); color: var(--mia-lilac); padding: 10px 12px; border-radius: 10px; font-size: 12px; }
+.muted, .empty { font-size: 13px; color: var(--mia-ink-soft); }
+.footnote { font-size: 11px; color: var(--mia-ink-faint); }
+.activity { padding: 0; margin: 0; list-style: none; }
+.activity li { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--mia-border); font-size: 12px; }
+.activity time { color: var(--mia-ink-faint); flex: 0 0 56px; font-size: 11px; white-space: nowrap; }
+.activity span { overflow-wrap: anywhere; }
+.domains { list-style: none; margin: 0 0 14px; padding: 0; }
+.domains li { display: flex; align-items: center; justify-content: space-between; font-size: 12px; gap: 6px; padding: 5px 0; }
+.domains span { overflow-wrap: anywhere; }
+.domains button { padding: 2px 7px; border: 0; background: transparent; font-size: 17px; color: var(--mia-ink-faint); }
+label { display: block; color: var(--mia-ink-soft); font-size: 11px; margin-bottom: 6px; }
+.input-row { display: flex; gap: 7px; }
+input, textarea { background: var(--mia-paper-raised); border: 1px solid var(--mia-border); border-radius: 10px; padding: 9px; min-width: 0; }
+input { width: 100%; font-size: 12px; }
+details { padding: 15px 0; font-size: 12px; color: var(--mia-ink-soft); }
+summary { cursor: pointer; }
+dl { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; }
+dd { margin: 0; overflow-wrap: anywhere; }
+pre { max-height: 260px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 10px; background: var(--mia-paper-alt); padding: 10px; border-radius: 8px; }
+footer { text-align: center; font-size: 12px; color: var(--mia-ink-soft); padding: 25px 18px; font-family: var(--mia-font-display); }
+footer span { color: var(--mia-ink-faint); font-size: 10px; font-family: var(--mia-font-body); }
+#message { border-left: 3px solid var(--mia-competent); padding: 8px 10px; background: var(--mia-paper-alt); font-size: 12px; overflow-wrap: anywhere; border-radius: 0 8px 8px 0; }
+#message.error { border-color: #a55548; background: #f7eae5; color: #894b3e; }
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } .mia-logo { animation: none; } }
+:focus { scroll-margin-top: 160px; }

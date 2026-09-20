@@ -5,8 +5,19 @@
   <title>Mia</title><link rel="stylesheet" href="sidepanel.css">
 </head>
 <body>
-  <header><div class="brand"><span class="mark" aria-hidden="true">m</span><div><h1>Mia</h1><p>A little attention. Less repetition.</p></div></div>
+  <header><div class="brand">
+      <span class="mia-logo" id="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 100 100" width="42" height="42">
+          <circle cx="50" cy="50" r="38" class="mia-logo-body" />
+          <ellipse cx="38" cy="48" rx="4.5" ry="6" class="mia-logo-eye" />
+          <ellipse cx="62" cy="48" rx="4.5" ry="6" class="mia-logo-eye" />
+          <path d="M42 60 Q50 64 58 60" class="mia-logo-mouth" />
+        </svg>
+        <span class="mia-logo-badge" id="brand-badge" hidden></span>
+      </span>
+      <div><h1>Mia</h1><p>A little attention. Less repetition.</p></div></div>
     <div class="observation"><span id="observation-status" role="status">Connecting…</span><button id="pause" disabled>Pause</button></div>
+    <a id="open-dashboard" class="quiet dashboard-link" href="#" target="_blank" rel="noopener">Open full dashboard ↗</a>
   </header>
   <main>
     <p id="mode" class="notice" hidden>Demo mode · sample proposals, local feedback</p>

@@ -44,6 +44,56 @@ def _load_saved_credentials() -> Credentials | None:
         return None
 
 
+def is_configured() -> bool:
+    """Whether a Google OAuth client (downloaded from Cloud Console) is present."""
+    return config.CLIENT_SECRET_FILE.exists()
+
+
+def is_connected() -> bool:
+    """Whether we currently hold usable (valid or refreshable) credentials."""
+    creds = _load_saved_credentials()
+    return bool(creds and (creds.valid or (creds.expired and creds.refresh_token)))
+
+
+def build_flow() -> Flow:
+    """Construct the Flow used by both the CLI consent script and the web
+    (dashboard-driven) start/callback endpoints, so they stay in sync."""
+    if not is_configured():
+        raise FileNotFoundError(
+            f"Missing client secret at {config.CLIENT_SECRET_FILE}. "
+            "Download the Web OAuth client JSON from the mia-hackmit project."
+        )
+    flow = Flow.from_client_secrets_file(
+        str(config.CLIENT_SECRET_FILE),
+        scopes=config.SCOPES,
+        redirect_uri=config.REDIRECT_URI,
+    )
+    # The downloaded client JSON points at the legacy v1 auth endpoint
+    # (/o/oauth2/auth), which rejects the modern `prompt` param with a plain
+    # "400 malformed" page. Force the current v2 endpoint.
+    flow.client_config["auth_uri"] = "https://accounts.google.com/o/oauth2/v2/auth"
+    return flow
+
+
+def get_authorization_url() -> tuple[str, str]:
+    """Build the Google consent URL for the web flow (agent.server)."""
+    flow = build_flow()
+    return flow.authorization_url(access_type="offline", prompt="consent")
+
+
+def exchange_code(code: str) -> Credentials:
+    """Exchange an OAuth ?code=... for credentials and persist them.
+
+    Used by the /v1/auth/google/callback route — the browser-based
+    counterpart to run_consent_flow()'s own local HTTP server below.
+    """
+    flow = build_flow()
+    flow.fetch_token(code=code)
+    creds = flow.credentials
+    _save_credentials(creds)
+    return creds
+
+
 class _CallbackHandler(BaseHTTPRequestHandler):
     """Captures the OAuth redirect and stashes the query on the server."""
 
@@ -78,23 +128,7 @@ class _CallbackHandler(BaseHTTPRequestHandler):
 
 def run_consent_flow() -> Credentials:
     """Run the full browser consent flow and return fresh credentials."""
-    if not config.CLIENT_SECRET_FILE.exists():
-        raise FileNotFoundError(
-            f"Missing client secret at {config.CLIENT_SECRET_FILE}. "
-            "Download the Web OAuth client JSON from the mia-hackmit project."
-        )
-
-    flow = Flow.from_client_secrets_file(
-        str(config.CLIENT_SECRET_FILE),
-        scopes=config.SCOPES,
-        redirect_uri=config.REDIRECT_URI,
-    )
-
-    # The downloaded client JSON points at the legacy v1 auth endpoint
-    # (/o/oauth2/auth), which rejects the modern `prompt` param with a plain
-    # "400 malformed" page. Force the current v2 endpoint.
-    flow.client_config["auth_uri"] = "https://accounts.google.com/o/oauth2/v2/auth"
-
+    flow = build_flow()
     auth_url, _state = flow.authorization_url(
         access_type="offline",       # -> issues a refresh token
         prompt="consent",            # -> forces consent so refresh token is (re)issued

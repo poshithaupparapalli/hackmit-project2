@@ -1,5 +1,7 @@
+import { CONFIG } from './config.js';
 const $ = selector => document.querySelector(selector);
 let state, updating = false;
+$('#open-dashboard').href = CONFIG.dashboardUrl;
 async function send(kind, data = {}) {
   const response = await chrome.runtime.sendMessage({ kind, ...data });
   if (!response?.ok) throw new Error(response?.error || 'Mia is reconnecting. Reload the panel and try again.');
@@ -39,6 +41,7 @@ function renderState(data) {
   state = data;
   $('#observation-status').textContent = data.settings.paused ? 'Mia is paused' : 'Mia is observing';
   $('#observation-status').classList.toggle('paused', data.settings.paused);
+  $('#brand-mark').classList.toggle('paused', data.settings.paused);
   $('#pause').textContent = data.settings.paused ? 'Resume' : 'Pause';
   $('#pause').disabled = false;
   $('#mode').hidden = !data.mock;
@@ -79,6 +82,10 @@ function renderSuggestion(suggestion) {
   }
   if (suggestion.kind === 'rule') { card.append(node('p', `When: ${suggestion.trigger || ''}`), node('p', `Rule: ${suggestion.action || ''}`)); }
   if (Number.isFinite(suggestion.confidence)) card.append(node('p', `${Math.round(Math.max(0, Math.min(1, suggestion.confidence)) * 100)}% confidence${Number.isFinite(suggestion.timeSavedPerWeekMinutes) ? ` · about ${suggestion.timeSavedPerWeekMinutes} min / week` : ''}`, 'confidence'));
+  const details = node('a', 'See details →', 'quiet card-links');
+  details.href = `${CONFIG.dashboardUrl}?suggestion=${encodeURIComponent(suggestion.id)}`;
+  details.target = '_blank'; details.rel = 'noopener';
+  card.append(details);
   const actions = node('div', undefined, 'actions');
   if (suggestion.status === 'proposed') {
     const yes = node('button', suggestion.kind === 'rule' ? "That's right" : 'Yes', 'primary');
@@ -108,6 +115,7 @@ function renderSuggestion(suggestion) {
 async function refreshSuggestions() {
   const suggestions = await send('suggestions:get');
   $('#suggestions').replaceChildren(...(suggestions.length ? suggestions.filter(item => item && typeof item.id === 'string').map(renderSuggestion) : [node('p', 'Nothing to propose yet. Mia is looking for repeated patterns.', 'empty')]));
+  $('#brand-badge').hidden = !suggestions.some(item => item?.status === 'proposed');
 }
 $('#pause').addEventListener('click', () => action($('#pause'), async () => {
   updating = true;

@@ -11,7 +11,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from app import analyst, demo  # noqa: E402
 from app.db import get_conn  # noqa: E402
-from app.routes import analyze, events, install, suggestions  # noqa: E402
+from app.routes import analyze, chat, events, install, suggestions  # noqa: E402
 
 MINER_INTERVAL_S = 60  # check gating every minute; mining itself is cheap
 
@@ -43,6 +43,7 @@ app.include_router(install.router, prefix="/v1")
 app.include_router(events.router, prefix="/v1")
 app.include_router(suggestions.router, prefix="/v1")
 app.include_router(analyze.router, prefix="/v1")
+app.include_router(chat.router, prefix="/v1")
 
 
 async def _miner_loop() -> None:

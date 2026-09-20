@@ -45,6 +45,11 @@ class WorkflowRun(BaseModel):
     result: Optional[dict] = None
     error: Optional[str] = None
     approvalRequest: Optional[ApprovalRequest] = None
+    # Additive fields (not in the original B4 shape) — needed to list run
+    # history for the dashboard. Optional so canned_run.json stays valid.
+    suggestionId: Optional[str] = None
+    startedAt: Optional[int] = None
+    triggeredBy: Literal["manual", "auto"] = "manual"
 
 
 class ApprovalCancelled(Exception):
@@ -177,9 +182,28 @@ WORKFLOWS: dict[str, tuple[list[str], WorkflowFn]] = {
     ),
 }
 
+# workflowKey -> zero-arg function returning the Gmail search query that
+# defines "there's new work for this workflow" (autorun.py polls these).
+# A workflowKey with no entry here is manual-Run-only — auto-run never picks
+# it up. Populated for gmail_to_sheet below; agent/workflows/*.py register
+# their own entry from register(), same pattern as WORKFLOWS.
+TRIGGER_QUERIES: dict[str, Callable[[], str]] = {
+    "gmail_to_sheet": lambda: config.GMAIL_TEST_QUERY,
+}
+
 
 def is_known_workflow(workflow_key: str) -> bool:
     return workflow_key in WORKFLOWS
+
+
+def is_run_active(workflow_key: str) -> bool:
+    """True if some run of this workflow is currently mid-flight — used by
+    autorun.py so a slow poll tick never starts a second overlapping run."""
+    with _LOCK:
+        return any(
+            h.run.workflowKey == workflow_key and h.run.status in ("running", "needs_approval")
+            for h in _RUNS.values()
+        )
 
 
 def discover_workflows() -> list[str]:
@@ -217,7 +241,7 @@ def discover_workflows() -> list[str]:
 # ---------------------------------------------------------------------------
 # Public API used by the FastAPI layer
 # ---------------------------------------------------------------------------
-def start_run(workflow_key: str, suggestion_id: str) -> str:
+def start_run(workflow_key: str, suggestion_id: str, triggered_by: Literal["manual", "auto"] = "manual") -> str:
     """Create a run and kick off execution in a background thread. Returns runId."""
     if workflow_key not in WORKFLOWS:
         raise KeyError(workflow_key)
@@ -229,6 +253,9 @@ def start_run(workflow_key: str, suggestion_id: str) -> str:
         workflowKey=workflow_key,
         status="running",
         steps=[RunStep(label=l) for l in labels],
+        suggestionId=suggestion_id,
+        startedAt=int(datetime.now(timezone.utc).timestamp() * 1000),
+        triggeredBy=triggered_by,
     )
     handle = _RunHandle(run)
     with _LOCK:
@@ -261,6 +288,15 @@ def get_run(run_id: str) -> Optional[WorkflowRun]:
         handle = _RUNS.get(run_id)
         # return a copy so callers can't mutate live state
         return handle.run.model_copy(deep=True) if handle else None
+
+
+def list_runs(limit: int = 50) -> list[WorkflowRun]:
+    """Most-recent-first run history for the dashboard. In-memory only —
+    does not survive an agent process restart (fine for the hackathon)."""
+    with _LOCK:
+        runs = [h.run.model_copy(deep=True) for h in _RUNS.values()]
+    runs.sort(key=lambda r: r.startedAt or 0, reverse=True)
+    return runs[:limit]
 
 
 def approve_run(run_id: str, decision: str = "approve") -> Optional[WorkflowRun]:
