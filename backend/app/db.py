@@ -82,6 +82,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
             confidence  REAL,
             time_saved_per_week_minutes REAL,
             status      TEXT NOT NULL,
+            run_mode    TEXT NOT NULL DEFAULT 'ask',
             created_at  INTEGER NOT NULL,
             updated_at  INTEGER NOT NULL
         );
@@ -109,6 +110,12 @@ def init_schema(conn: sqlite3.Connection) -> None:
         );
         """
     )
+    # Migration: run_mode was added after suggestions already existed on disk.
+    # CREATE TABLE IF NOT EXISTS above only shapes a brand-new DB, so a
+    # pre-existing suggestions table needs the column added explicitly.
+    columns = {row["name"] for row in conn.execute("PRAGMA table_info(suggestions)")}
+    if "run_mode" not in columns:
+        conn.execute("ALTER TABLE suggestions ADD COLUMN run_mode TEXT NOT NULL DEFAULT 'ask'")
     conn.commit()
 
 

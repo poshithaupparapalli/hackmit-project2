@@ -18,6 +18,8 @@ import {
   workflowLabel,
   type ChatMessage,
   type GoogleAuthStatus,
+  type PendingTrigger,
+  type RunMode,
   type Suggestion,
   type SuggestionKind,
   type WorkflowRun,
@@ -196,9 +198,10 @@ interface SuggestionCardProps {
   onAccept: (s: Suggestion) => void;
   onRun: (s: Suggestion) => void;
   onForget: (s: Suggestion) => void;
+  onSetRunMode: (s: Suggestion, mode: RunMode) => void;
 }
 
-function SuggestionCard({ suggestion, activeRun, lastRun, busy, variant, highlighted, googleConnected, onAccept, onRun, onForget }: SuggestionCardProps) {
+function SuggestionCard({ suggestion, activeRun, lastRun, busy, variant, highlighted, googleConnected, onAccept, onRun, onForget, onSetRunMode }: SuggestionCardProps) {
   // Rules never carry a workflowKey server-side (see analyst.py), but this
   // guards any already-stored suggestion from an older run too.
   const runnable = Boolean(suggestion.workflowKey) && suggestion.kind !== 'rule';
@@ -251,13 +254,38 @@ function SuggestionCard({ suggestion, activeRun, lastRun, busy, variant, highlig
         {confidencePct(suggestion.confidence)} confidence
         {suggestion.timeSavedPerWeekMinutes > 0 ? ` · about ${Math.round(suggestion.timeSavedPerWeekMinutes)} min/week saved` : ''}
       </div>
+      {variant === 'active' && runnable && (
+        <div className="run-mode-row">
+          <span className="run-mode-label">When new input shows up:</span>
+          <div className="run-mode-toggle" role="group" aria-label="Run mode">
+            <button
+              type="button"
+              className={suggestion.runMode === 'auto' ? 'active' : ''}
+              disabled={busy}
+              onClick={() => onSetRunMode(suggestion, 'auto')}
+            >
+              Run automatically
+            </button>
+            <button
+              type="button"
+              className={suggestion.runMode === 'ask' ? 'active' : ''}
+              disabled={busy}
+              onClick={() => onSetRunMode(suggestion, 'ask')}
+            >
+              Ask me every time
+            </button>
+          </div>
+        </div>
+      )}
       {variant === 'active' && (
         <p className="auto-run-note">
           {suggestion.kind === 'rule'
             ? 'Mia applies this as a standing preference — nothing to run.'
-            : runnable
-              ? 'Enabled — Mia runs this on her own when new matching input shows up. You can also run it right now.'
-              : 'Not yet automatable — nothing will run until this workflow is built.'}
+            : !runnable
+              ? 'Not yet automatable — nothing will run until this workflow is built.'
+              : suggestion.runMode === 'auto'
+                ? 'Mia runs this on her own, no click needed. You can also run it right now.'
+                : "Mia will ask before running this. You can also run it right now."}
         </p>
       )}
       <div className="actions">
@@ -362,6 +390,36 @@ function ApprovalBanner({ runs, onDecide }: { runs: WorkflowRun[]; onDecide: (ru
   );
 }
 
+function PendingTriggerBanner({
+  triggers,
+  onDecide,
+}: {
+  triggers: PendingTrigger[];
+  onDecide: (trigger: PendingTrigger, decision: 'approve' | 'dismiss') => void;
+}) {
+  if (triggers.length === 0) return null;
+  return (
+    <>
+      {triggers.map((trigger) => (
+        <div className="banner banner--approval" key={trigger.id}>
+          <div>
+            <strong>{trigger.title}</strong>
+            <p style={{ margin: '4px 0 0' }}>{trigger.description}</p>
+          </div>
+          <div className="banner__actions">
+            <button className="primary" onClick={() => onDecide(trigger, 'approve')}>
+              Run now
+            </button>
+            <button className="quiet" onClick={() => onDecide(trigger, 'dismiss')}>
+              Not now
+            </button>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
 function ConnectGooglePrompt({
   title,
   configured,
@@ -443,6 +501,7 @@ export function App() {
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [connectPrompt, setConnectPrompt] = useState<string | null>(null);
   const [suggestedShown, setSuggestedShown] = useState(6);
+  const [pending, setPending] = useState<PendingTrigger[]>([]);
 
   const refreshSuggestions = useCallback(async () => {
     try {
@@ -474,10 +533,20 @@ export function App() {
     }
   }, []);
 
+  const refreshPending = useCallback(async () => {
+    try {
+      const list = await agent.listPending();
+      setPending(list);
+      setAgentError(null);
+    } catch (err) {
+      setAgentError(errMessage(err));
+    }
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     async function tick() {
-      await Promise.all([refreshSuggestions(), refreshRuns(), refreshAuth()]);
+      await Promise.all([refreshSuggestions(), refreshRuns(), refreshAuth(), refreshPending()]);
       if (!cancelled) setLoaded(true);
     }
     tick();
@@ -486,7 +555,7 @@ export function App() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [refreshSuggestions, refreshRuns, refreshAuth]);
+  }, [refreshSuggestions, refreshRuns, refreshAuth, refreshPending]);
 
   // Two ways this page is opened with a query string: Google redirecting back
   // after the OAuth callback (?connected=1|0), and the side panel's "See
@@ -578,6 +647,35 @@ export function App() {
     [refreshSuggestions],
   );
 
+  const handleSetRunMode = useCallback(
+    async (suggestion: Suggestion, mode: RunMode) => {
+      if (suggestion.runMode === mode) return;
+      setBusy(suggestion.id, true);
+      try {
+        await backend.setRunMode(suggestion.id, mode);
+        await refreshSuggestions();
+      } catch (err) {
+        setBackendError(errMessage(err));
+      } finally {
+        setBusy(suggestion.id, false);
+      }
+    },
+    [refreshSuggestions],
+  );
+
+  const handlePendingDecision = useCallback(
+    async (trigger: PendingTrigger, decision: 'approve' | 'dismiss') => {
+      try {
+        if (decision === 'approve') await agent.approvePending(trigger.id);
+        else await agent.dismissPending(trigger.id);
+        await Promise.all([refreshPending(), refreshRuns()]);
+      } catch (err) {
+        setAgentError(errMessage(err));
+      }
+    },
+    [refreshPending, refreshRuns],
+  );
+
   const handleApprovalDecision = useCallback(
     async (run: WorkflowRun, decision: 'approve' | 'cancel') => {
       try {
@@ -623,6 +721,7 @@ export function App() {
         </header>
 
         <ApprovalBanner runs={runs} onDecide={handleApprovalDecision} />
+        <PendingTriggerBanner triggers={pending} onDecide={handlePendingDecision} />
         {connectPrompt && (
           <ConnectGooglePrompt
             title={connectPrompt}
@@ -669,6 +768,7 @@ export function App() {
                     onAccept={handleAccept}
                     onRun={handleRun}
                     onForget={handleForget}
+                    onSetRunMode={handleSetRunMode}
                   />
                 );
               })}
@@ -705,6 +805,7 @@ export function App() {
                       onAccept={handleAccept}
                       onRun={handleRun}
                       onForget={handleForget}
+                      onSetRunMode={handleSetRunMode}
                     />
                   );
                 })}
