@@ -58,7 +58,8 @@ def _datetime(value: str, zone: str | None) -> datetime:
     except ValueError:
         result = None
         for fmt in ("%B %d, %Y %I:%M %p", "%b %d, %Y %I:%M %p",
-                    "%Y-%m-%d %I:%M %p", "%B %d, %Y %I %p"):
+                    "%Y-%m-%d %I:%M %p", "%Y-%m-%d %I %p",
+                    "%B %d, %Y %I %p"):
             try:
                 result = datetime.strptime(value, fmt)
                 break
@@ -77,13 +78,28 @@ def _datetime(value: str, zone: str | None) -> datetime:
     return result
 
 
-def extract_meeting(body: str, subject: str = "") -> dict:
+def extract_meeting(body: str, subject: str = "", sender: str = "") -> dict:
     """Conservative, offline extraction; never guess dates, guests or duration."""
     fields = _fields(body)
     zone = fields.get("timezone") or os.getenv("MIA_CALENDAR_TIMEZONE")
     start_text = fields.get("start")
     if not start_text and fields.get("date") and fields.get("time"):
         start_text = f"{fields['date']} {fields['time']}"
+    # Demo-friendly prose: "meet tomorrow 9/21 from 5pm-6pm". The date is
+    # explicit; use the current year and a configured/local demo timezone.
+    if not start_text:
+        prose = re.search(
+            r"\b(?P<month>\d{1,2})/(?P<day>\d{1,2})\b[^\n]{0,40}?"
+            r"(?:from\s+)?(?P<start>\d{1,2}(?::\d{2})?\s*(?:am|pm))\s*[-–]\s*"
+            r"(?P<end>\d{1,2}(?::\d{2})?\s*(?:am|pm))",
+            body, re.IGNORECASE,
+        )
+        if prose:
+            year = datetime.now().year
+            date = f"{year:04d}-{int(prose.group('month')):02d}-{int(prose.group('day')):02d}"
+            start_text = f"{date} {prose.group('start')}"
+            fields["end"] = f"{date} {prose.group('end')}"
+            zone = zone or os.getenv("TZ") or "America/New_York"
     # Ordinary prose with a single explicit ISO start/end also works.
     if not start_text:
         stamps = re.findall(r"\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:Z|[+-]\d{2}:\d{2})", body)
@@ -108,6 +124,10 @@ def extract_meeting(body: str, subject: str = "") -> dict:
             address = address.lower()
             if not any(a["email"] == address for a in attendees):
                 attendees.append({"email": address, **({"displayName": name} if name else {})})
+    elif sender:
+        _, sender_address = getaddresses([sender])[0]
+        if _EMAIL.fullmatch(sender_address):
+            attendees.append({"email": sender_address.lower()})
     else:
         raise ValueError("Email needs an Attendees field with explicit email addresses.")
     if not attendees:
@@ -141,7 +161,7 @@ def execute(ctx: runner.RunContext, suggestion_id: str) -> dict:
         ctx.finish_step(active)
         active = STEP_LABELS[1]
         ctx.start_step(active)
-        event = extract_meeting(msg.body or msg.snippet, msg.subject)
+        event = extract_meeting(msg.body or msg.snippet, msg.subject, msg.sender)
         ctx.finish_step(active)
         active = STEP_LABELS[2]
         ctx.start_step(active)
