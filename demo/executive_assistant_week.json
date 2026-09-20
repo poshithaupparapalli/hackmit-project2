@@ -1,0 +1,2146 @@
+{
+  "meta": {
+    "name": "Mia Executive Assistant Demo Week",
+    "persona": "Maya Patel, Executive Assistant to Jordan Lee, CEO of Northstar",
+    "timezone": "America/New_York",
+    "dateRange": "2026-09-14 through 2026-09-18",
+    "generatedForDemoDate": "2026-09-20",
+    "installIdPlaceholder": "__INSTALL_ID__",
+    "eventCount": 88,
+    "intendedPatterns": [
+      "Receipt emails -> copy Total -> Executive Office Expenses -> Amount",
+      "Meeting-request emails -> Google Calendar -> create event",
+      "Routine external meetings requested before 10 AM are moved to 10 AM or later; investor meeting is an exception"
+    ]
+  },
+  "events": [
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0001",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-noise-10",
+      "timestamp": 1789388400000,
+      "sequence": 1,
+      "tabId": 10,
+      "frameId": 0,
+      "type": "nav",
+      "host": "notion.so",
+      "path": "/",
+      "title": "Northstar Weekly Priorities",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Northstar Weekly Priorities"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0002",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-noise-10",
+      "timestamp": 1789388412000,
+      "sequence": 2,
+      "tabId": 10,
+      "frameId": 0,
+      "type": "click",
+      "host": "notion.so",
+      "path": "/",
+      "title": "Northstar Weekly Priorities",
+      "detail": {
+        "tag": "A",
+        "role": "link",
+        "label": "Open"
+      },
+      "context": {
+        "pageTitle": "Northstar Weekly Priorities",
+        "targetLabel": "Open"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0003",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-noise-10",
+      "timestamp": 1789388430000,
+      "sequence": 3,
+      "tabId": 10,
+      "frameId": 0,
+      "type": "scroll",
+      "host": "notion.so",
+      "path": "/",
+      "title": "Northstar Weekly Priorities",
+      "detail": {
+        "depth": 50
+      },
+      "context": {
+        "pageTitle": "Northstar Weekly Priorities"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0004",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-receipt-uber",
+      "timestamp": 1789391100000,
+      "sequence": 4,
+      "tabId": 11,
+      "frameId": 0,
+      "type": "nav",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Gmail"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0005",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-receipt-uber",
+      "timestamp": 1789391108000,
+      "sequence": 5,
+      "tabId": 11,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "DIV",
+        "role": "main",
+        "label": "Receipt from Uber \u2014 Sep 14"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Receipt from Uber \u2014 Sep 14",
+        "sectionLabel": "Inbox",
+        "targetLabel": "Receipt from Uber \u2014 Sep 14",
+        "semanticType": "receipt"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0006",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-receipt-uber",
+      "timestamp": 1789391120000,
+      "sequence": 6,
+      "tabId": 11,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "SPAN",
+        "role": "text",
+        "label": "Total"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Receipt from Uber \u2014 Sep 14",
+        "sectionLabel": "Receipt",
+        "targetLabel": "Total",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0007",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-receipt-uber",
+      "timestamp": 1789391128000,
+      "sequence": 7,
+      "tabId": 11,
+      "frameId": 0,
+      "type": "copy",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "length": 6,
+        "wordCount": 1
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Receipt from Uber \u2014 Sep 14",
+        "sectionLabel": "Receipt",
+        "targetLabel": "Total",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0008",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-receipt-uber",
+      "timestamp": 1789391148000,
+      "sequence": 8,
+      "tabId": 12,
+      "frameId": 0,
+      "type": "nav",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "referrerHost": "mail.google.com"
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "semanticType": "spreadsheet"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0009",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-receipt-uber",
+      "timestamp": 1789391163000,
+      "sequence": 9,
+      "tabId": 12,
+      "frameId": 0,
+      "type": "paste",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "length": 6,
+        "targetTag": "DIV",
+        "targetName": "Amount"
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "targetLabel": "Amount",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0010",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-receipt-uber",
+      "timestamp": 1789391172000,
+      "sequence": 10,
+      "tabId": 12,
+      "frameId": 0,
+      "type": "edit",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "tag": "DIV",
+        "inputType": "text",
+        "name": "Amount",
+        "length": 6
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "targetLabel": "Amount",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0011",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-calendar-meeting-request:-acme-ventures-\u2014-8:30-am",
+      "timestamp": 1789395000000,
+      "sequence": 11,
+      "tabId": 13,
+      "frameId": 0,
+      "type": "nav",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Gmail"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0012",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-calendar-meeting-request:-acme-ventures-\u2014-8:30-am",
+      "timestamp": 1789395007000,
+      "sequence": 12,
+      "tabId": 13,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "DIV",
+        "role": "main",
+        "label": "Meeting request: Acme Ventures \u2014 8:30 AM"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Meeting request: Acme Ventures \u2014 8:30 AM",
+        "sectionLabel": "Inbox",
+        "targetLabel": "Meeting request: Acme Ventures \u2014 8:30 AM",
+        "semanticType": "scheduling_request",
+        "nearbyText": "Requested time: 8:30 AM"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0013",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-calendar-meeting-request:-acme-ventures-\u2014-8:30-am",
+      "timestamp": 1789395026000,
+      "sequence": 13,
+      "tabId": 14,
+      "frameId": 0,
+      "type": "nav",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "referrerHost": "mail.google.com"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "sectionLabel": "Week view",
+        "semanticType": "calendar"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0014",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-calendar-meeting-request:-acme-ventures-\u2014-8:30-am",
+      "timestamp": 1789395035000,
+      "sequence": 14,
+      "tabId": 14,
+      "frameId": 0,
+      "type": "click",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "BUTTON",
+        "role": "button",
+        "label": "Create"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "formLabel": "Create event",
+        "targetLabel": "Create",
+        "semanticType": "calendar_event"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0015",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-calendar-meeting-request:-acme-ventures-\u2014-8:30-am",
+      "timestamp": 1789395049000,
+      "sequence": 15,
+      "tabId": 14,
+      "frameId": 0,
+      "type": "edit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "INPUT",
+        "inputType": "text",
+        "name": "Title",
+        "length": 40
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Acme Ventures \u2014 8:30 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Title",
+        "semanticType": "external_meeting"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0016",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-calendar-meeting-request:-acme-ventures-\u2014-8:30-am",
+      "timestamp": 1789395061000,
+      "sequence": 16,
+      "tabId": 14,
+      "frameId": 0,
+      "type": "edit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "INPUT",
+        "inputType": "text",
+        "name": "Start time",
+        "length": 5
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Acme Ventures \u2014 8:30 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Start time",
+        "semanticType": "datetime",
+        "nearbyText": "Selected 10:30 AM slot"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0017",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-calendar-meeting-request:-acme-ventures-\u2014-8:30-am",
+      "timestamp": 1789395078000,
+      "sequence": 17,
+      "tabId": 14,
+      "frameId": 0,
+      "type": "submit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "name": "Create event",
+        "actionHost": "calendar.google.com",
+        "actionPath": "/calendar/u/0/r",
+        "fieldCount": 4,
+        "via": "button"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Acme Ventures \u2014 8:30 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Save",
+        "semanticType": "calendar_event"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0018",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-noise-15",
+      "timestamp": 1789409400000,
+      "sequence": 18,
+      "tabId": 15,
+      "frameId": 0,
+      "type": "nav",
+      "host": "docs.google.com",
+      "path": "/",
+      "title": "Q4 Board Prep - Google Docs",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Q4 Board Prep - Google Docs"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0019",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-noise-15",
+      "timestamp": 1789409412000,
+      "sequence": 19,
+      "tabId": 15,
+      "frameId": 0,
+      "type": "click",
+      "host": "docs.google.com",
+      "path": "/",
+      "title": "Q4 Board Prep - Google Docs",
+      "detail": {
+        "tag": "A",
+        "role": "link",
+        "label": "Open"
+      },
+      "context": {
+        "pageTitle": "Q4 Board Prep - Google Docs",
+        "targetLabel": "Open"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0020",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-14-noise-15",
+      "timestamp": 1789409430000,
+      "sequence": 20,
+      "tabId": 15,
+      "frameId": 0,
+      "type": "scroll",
+      "host": "docs.google.com",
+      "path": "/",
+      "title": "Q4 Board Prep - Google Docs",
+      "detail": {
+        "depth": 50
+      },
+      "context": {
+        "pageTitle": "Q4 Board Prep - Google Docs"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0021",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-receipt-delta",
+      "timestamp": 1789476300000,
+      "sequence": 21,
+      "tabId": 16,
+      "frameId": 0,
+      "type": "nav",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Gmail"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0022",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-receipt-delta",
+      "timestamp": 1789476308000,
+      "sequence": 22,
+      "tabId": 16,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "DIV",
+        "role": "main",
+        "label": "Delta receipt \u2014 BOS to JFK"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Delta receipt \u2014 BOS to JFK",
+        "sectionLabel": "Inbox",
+        "targetLabel": "Delta receipt \u2014 BOS to JFK",
+        "semanticType": "receipt"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0023",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-receipt-delta",
+      "timestamp": 1789476320000,
+      "sequence": 23,
+      "tabId": 16,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "SPAN",
+        "role": "text",
+        "label": "Total"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Delta receipt \u2014 BOS to JFK",
+        "sectionLabel": "Receipt",
+        "targetLabel": "Total",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0024",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-receipt-delta",
+      "timestamp": 1789476328000,
+      "sequence": 24,
+      "tabId": 16,
+      "frameId": 0,
+      "type": "copy",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "length": 6,
+        "wordCount": 1
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Delta receipt \u2014 BOS to JFK",
+        "sectionLabel": "Receipt",
+        "targetLabel": "Total",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0025",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-receipt-delta",
+      "timestamp": 1789476348000,
+      "sequence": 25,
+      "tabId": 17,
+      "frameId": 0,
+      "type": "nav",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "referrerHost": "mail.google.com"
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "semanticType": "spreadsheet"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0026",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-receipt-delta",
+      "timestamp": 1789476363000,
+      "sequence": 26,
+      "tabId": 17,
+      "frameId": 0,
+      "type": "paste",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "length": 6,
+        "targetTag": "DIV",
+        "targetName": "Amount"
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "targetLabel": "Amount",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0027",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-receipt-delta",
+      "timestamp": 1789476372000,
+      "sequence": 27,
+      "tabId": 17,
+      "frameId": 0,
+      "type": "edit",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "tag": "DIV",
+        "inputType": "text",
+        "name": "Amount",
+        "length": 6
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "targetLabel": "Amount",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0028",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-calendar-meeting-request:-northstar-legal-\u2014-9:00-",
+      "timestamp": 1789480800000,
+      "sequence": 28,
+      "tabId": 18,
+      "frameId": 0,
+      "type": "nav",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Gmail"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0029",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-calendar-meeting-request:-northstar-legal-\u2014-9:00-",
+      "timestamp": 1789480807000,
+      "sequence": 29,
+      "tabId": 18,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "DIV",
+        "role": "main",
+        "label": "Meeting request: Northstar Legal \u2014 9:00 AM"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Meeting request: Northstar Legal \u2014 9:00 AM",
+        "sectionLabel": "Inbox",
+        "targetLabel": "Meeting request: Northstar Legal \u2014 9:00 AM",
+        "semanticType": "scheduling_request",
+        "nearbyText": "Requested time: 9:00 AM"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0030",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-calendar-meeting-request:-northstar-legal-\u2014-9:00-",
+      "timestamp": 1789480826000,
+      "sequence": 30,
+      "tabId": 19,
+      "frameId": 0,
+      "type": "nav",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "referrerHost": "mail.google.com"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "sectionLabel": "Week view",
+        "semanticType": "calendar"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0031",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-calendar-meeting-request:-northstar-legal-\u2014-9:00-",
+      "timestamp": 1789480835000,
+      "sequence": 31,
+      "tabId": 19,
+      "frameId": 0,
+      "type": "click",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "BUTTON",
+        "role": "button",
+        "label": "Create"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "formLabel": "Create event",
+        "targetLabel": "Create",
+        "semanticType": "calendar_event"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0032",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-calendar-meeting-request:-northstar-legal-\u2014-9:00-",
+      "timestamp": 1789480849000,
+      "sequence": 32,
+      "tabId": 19,
+      "frameId": 0,
+      "type": "edit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "INPUT",
+        "inputType": "text",
+        "name": "Title",
+        "length": 42
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Northstar Legal \u2014 9:00 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Title",
+        "semanticType": "external_meeting"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0033",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-calendar-meeting-request:-northstar-legal-\u2014-9:00-",
+      "timestamp": 1789480861000,
+      "sequence": 33,
+      "tabId": 19,
+      "frameId": 0,
+      "type": "edit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "INPUT",
+        "inputType": "text",
+        "name": "Start time",
+        "length": 5
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Northstar Legal \u2014 9:00 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Start time",
+        "semanticType": "datetime",
+        "nearbyText": "Selected 11:00 AM slot"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0034",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-calendar-meeting-request:-northstar-legal-\u2014-9:00-",
+      "timestamp": 1789480878000,
+      "sequence": 34,
+      "tabId": 19,
+      "frameId": 0,
+      "type": "submit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "name": "Create event",
+        "actionHost": "calendar.google.com",
+        "actionPath": "/calendar/u/0/r",
+        "fieldCount": 4,
+        "via": "button"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Northstar Legal \u2014 9:00 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Save",
+        "semanticType": "calendar_event"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0035",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-noise-20",
+      "timestamp": 1789494000000,
+      "sequence": 35,
+      "tabId": 20,
+      "frameId": 0,
+      "type": "nav",
+      "host": "drive.google.com",
+      "path": "/",
+      "title": "Northstar Drive",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Northstar Drive"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0036",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-noise-20",
+      "timestamp": 1789494012000,
+      "sequence": 36,
+      "tabId": 20,
+      "frameId": 0,
+      "type": "click",
+      "host": "drive.google.com",
+      "path": "/",
+      "title": "Northstar Drive",
+      "detail": {
+        "tag": "A",
+        "role": "link",
+        "label": "Open"
+      },
+      "context": {
+        "pageTitle": "Northstar Drive",
+        "targetLabel": "Open"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0037",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-15-noise-20",
+      "timestamp": 1789494030000,
+      "sequence": 37,
+      "tabId": 20,
+      "frameId": 0,
+      "type": "scroll",
+      "host": "drive.google.com",
+      "path": "/",
+      "title": "Northstar Drive",
+      "detail": {
+        "depth": 50
+      },
+      "context": {
+        "pageTitle": "Northstar Drive"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0038",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-receipt-marriott",
+      "timestamp": 1789564200000,
+      "sequence": 38,
+      "tabId": 21,
+      "frameId": 0,
+      "type": "nav",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Gmail"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0039",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-receipt-marriott",
+      "timestamp": 1789564208000,
+      "sequence": 39,
+      "tabId": 21,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "DIV",
+        "role": "main",
+        "label": "Marriott receipt \u2014 Cambridge"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Marriott receipt \u2014 Cambridge",
+        "sectionLabel": "Inbox",
+        "targetLabel": "Marriott receipt \u2014 Cambridge",
+        "semanticType": "receipt"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0040",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-receipt-marriott",
+      "timestamp": 1789564220000,
+      "sequence": 40,
+      "tabId": 21,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "SPAN",
+        "role": "text",
+        "label": "Total"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Marriott receipt \u2014 Cambridge",
+        "sectionLabel": "Receipt",
+        "targetLabel": "Total",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0041",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-receipt-marriott",
+      "timestamp": 1789564228000,
+      "sequence": 41,
+      "tabId": 21,
+      "frameId": 0,
+      "type": "copy",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "length": 6,
+        "wordCount": 1
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Marriott receipt \u2014 Cambridge",
+        "sectionLabel": "Receipt",
+        "targetLabel": "Total",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0042",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-receipt-marriott",
+      "timestamp": 1789564248000,
+      "sequence": 42,
+      "tabId": 22,
+      "frameId": 0,
+      "type": "nav",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "referrerHost": "mail.google.com"
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "semanticType": "spreadsheet"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0043",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-receipt-marriott",
+      "timestamp": 1789564263000,
+      "sequence": 43,
+      "tabId": 22,
+      "frameId": 0,
+      "type": "paste",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "length": 6,
+        "targetTag": "DIV",
+        "targetName": "Amount"
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "targetLabel": "Amount",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0044",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-receipt-marriott",
+      "timestamp": 1789564272000,
+      "sequence": 44,
+      "tabId": 22,
+      "frameId": 0,
+      "type": "edit",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "tag": "DIV",
+        "inputType": "text",
+        "name": "Amount",
+        "length": 6
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "targetLabel": "Amount",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0045",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-calendar-meeting-request:-meridian-partners-\u2014-2:0",
+      "timestamp": 1789568400000,
+      "sequence": 45,
+      "tabId": 23,
+      "frameId": 0,
+      "type": "nav",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Gmail"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0046",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-calendar-meeting-request:-meridian-partners-\u2014-2:0",
+      "timestamp": 1789568407000,
+      "sequence": 46,
+      "tabId": 23,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "DIV",
+        "role": "main",
+        "label": "Meeting request: Meridian Partners \u2014 2:00 PM"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Meeting request: Meridian Partners \u2014 2:00 PM",
+        "sectionLabel": "Inbox",
+        "targetLabel": "Meeting request: Meridian Partners \u2014 2:00 PM",
+        "semanticType": "scheduling_request",
+        "nearbyText": "Requested time: 2:00 PM"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0047",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-calendar-meeting-request:-meridian-partners-\u2014-2:0",
+      "timestamp": 1789568426000,
+      "sequence": 47,
+      "tabId": 24,
+      "frameId": 0,
+      "type": "nav",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "referrerHost": "mail.google.com"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "sectionLabel": "Week view",
+        "semanticType": "calendar"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0048",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-calendar-meeting-request:-meridian-partners-\u2014-2:0",
+      "timestamp": 1789568435000,
+      "sequence": 48,
+      "tabId": 24,
+      "frameId": 0,
+      "type": "click",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "BUTTON",
+        "role": "button",
+        "label": "Create"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "formLabel": "Create event",
+        "targetLabel": "Create",
+        "semanticType": "calendar_event"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0049",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-calendar-meeting-request:-meridian-partners-\u2014-2:0",
+      "timestamp": 1789568449000,
+      "sequence": 49,
+      "tabId": 24,
+      "frameId": 0,
+      "type": "edit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "INPUT",
+        "inputType": "text",
+        "name": "Title",
+        "length": 44
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Meridian Partners \u2014 2:00 PM",
+        "formLabel": "Create event",
+        "targetLabel": "Title",
+        "semanticType": "external_meeting"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0050",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-calendar-meeting-request:-meridian-partners-\u2014-2:0",
+      "timestamp": 1789568461000,
+      "sequence": 50,
+      "tabId": 24,
+      "frameId": 0,
+      "type": "edit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "INPUT",
+        "inputType": "text",
+        "name": "Start time",
+        "length": 5
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Meridian Partners \u2014 2:00 PM",
+        "formLabel": "Create event",
+        "targetLabel": "Start time",
+        "semanticType": "datetime",
+        "nearbyText": "Selected 2:00 PM slot"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0051",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-calendar-meeting-request:-meridian-partners-\u2014-2:0",
+      "timestamp": 1789568478000,
+      "sequence": 51,
+      "tabId": 24,
+      "frameId": 0,
+      "type": "submit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "name": "Create event",
+        "actionHost": "calendar.google.com",
+        "actionPath": "/calendar/u/0/r",
+        "fieldCount": 4,
+        "via": "button"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Meridian Partners \u2014 2:00 PM",
+        "formLabel": "Create event",
+        "targetLabel": "Save",
+        "semanticType": "calendar_event"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0052",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-noise-25",
+      "timestamp": 1789587000000,
+      "sequence": 52,
+      "tabId": 25,
+      "frameId": 0,
+      "type": "nav",
+      "host": "linkedin.com",
+      "path": "/",
+      "title": "LinkedIn",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "LinkedIn"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0053",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-noise-25",
+      "timestamp": 1789587012000,
+      "sequence": 53,
+      "tabId": 25,
+      "frameId": 0,
+      "type": "click",
+      "host": "linkedin.com",
+      "path": "/",
+      "title": "LinkedIn",
+      "detail": {
+        "tag": "A",
+        "role": "link",
+        "label": "Open"
+      },
+      "context": {
+        "pageTitle": "LinkedIn",
+        "targetLabel": "Open"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0054",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-16-noise-25",
+      "timestamp": 1789587030000,
+      "sequence": 54,
+      "tabId": 25,
+      "frameId": 0,
+      "type": "scroll",
+      "host": "linkedin.com",
+      "path": "/",
+      "title": "LinkedIn",
+      "detail": {
+        "depth": 50
+      },
+      "context": {
+        "pageTitle": "LinkedIn"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0055",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-receipt-staples",
+      "timestamp": 1789649400000,
+      "sequence": 55,
+      "tabId": 26,
+      "frameId": 0,
+      "type": "nav",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Gmail"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0056",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-receipt-staples",
+      "timestamp": 1789649408000,
+      "sequence": 56,
+      "tabId": 26,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "DIV",
+        "role": "main",
+        "label": "Staples receipt \u2014 Office supplies"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Staples receipt \u2014 Office supplies",
+        "sectionLabel": "Inbox",
+        "targetLabel": "Staples receipt \u2014 Office supplies",
+        "semanticType": "receipt"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0057",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-receipt-staples",
+      "timestamp": 1789649420000,
+      "sequence": 57,
+      "tabId": 26,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "SPAN",
+        "role": "text",
+        "label": "Total"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Staples receipt \u2014 Office supplies",
+        "sectionLabel": "Receipt",
+        "targetLabel": "Total",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0058",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-receipt-staples",
+      "timestamp": 1789649428000,
+      "sequence": 58,
+      "tabId": 26,
+      "frameId": 0,
+      "type": "copy",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "length": 6,
+        "wordCount": 1
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Staples receipt \u2014 Office supplies",
+        "sectionLabel": "Receipt",
+        "targetLabel": "Total",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0059",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-receipt-staples",
+      "timestamp": 1789649448000,
+      "sequence": 59,
+      "tabId": 27,
+      "frameId": 0,
+      "type": "nav",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "referrerHost": "mail.google.com"
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "semanticType": "spreadsheet"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0060",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-receipt-staples",
+      "timestamp": 1789649463000,
+      "sequence": 60,
+      "tabId": 27,
+      "frameId": 0,
+      "type": "paste",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "length": 6,
+        "targetTag": "DIV",
+        "targetName": "Amount"
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "targetLabel": "Amount",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0061",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-receipt-staples",
+      "timestamp": 1789649472000,
+      "sequence": 61,
+      "tabId": 27,
+      "frameId": 0,
+      "type": "edit",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "tag": "DIV",
+        "inputType": "text",
+        "name": "Amount",
+        "length": 6
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "targetLabel": "Amount",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0062",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-calendar-investor-meeting-request:-horizon-capita",
+      "timestamp": 1789653900000,
+      "sequence": 62,
+      "tabId": 28,
+      "frameId": 0,
+      "type": "nav",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Gmail"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0063",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-calendar-investor-meeting-request:-horizon-capita",
+      "timestamp": 1789653907000,
+      "sequence": 63,
+      "tabId": 28,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "DIV",
+        "role": "main",
+        "label": "Investor meeting request: Horizon Capital \u2014 8:00 AM"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Investor meeting request: Horizon Capital \u2014 8:00 AM",
+        "sectionLabel": "Inbox",
+        "targetLabel": "Investor meeting request: Horizon Capital \u2014 8:00 AM",
+        "semanticType": "scheduling_request",
+        "nearbyText": "Requested time: 8:00 AM"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0064",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-calendar-investor-meeting-request:-horizon-capita",
+      "timestamp": 1789653926000,
+      "sequence": 64,
+      "tabId": 29,
+      "frameId": 0,
+      "type": "nav",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "referrerHost": "mail.google.com"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "sectionLabel": "Week view",
+        "semanticType": "calendar"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0065",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-calendar-investor-meeting-request:-horizon-capita",
+      "timestamp": 1789653935000,
+      "sequence": 65,
+      "tabId": 29,
+      "frameId": 0,
+      "type": "click",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "BUTTON",
+        "role": "button",
+        "label": "Create"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "formLabel": "Create event",
+        "targetLabel": "Create",
+        "semanticType": "calendar_event"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0066",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-calendar-investor-meeting-request:-horizon-capita",
+      "timestamp": 1789653949000,
+      "sequence": 66,
+      "tabId": 29,
+      "frameId": 0,
+      "type": "edit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "INPUT",
+        "inputType": "text",
+        "name": "Title",
+        "length": 51
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Investor meeting request: Horizon Capital \u2014 8:00 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Title",
+        "semanticType": "investor_meeting"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0067",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-calendar-investor-meeting-request:-horizon-capita",
+      "timestamp": 1789653961000,
+      "sequence": 67,
+      "tabId": 29,
+      "frameId": 0,
+      "type": "edit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "INPUT",
+        "inputType": "text",
+        "name": "Start time",
+        "length": 5
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Investor meeting request: Horizon Capital \u2014 8:00 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Start time",
+        "semanticType": "datetime",
+        "nearbyText": "Selected 8:00 AM slot"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0068",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-calendar-investor-meeting-request:-horizon-capita",
+      "timestamp": 1789653978000,
+      "sequence": 68,
+      "tabId": 29,
+      "frameId": 0,
+      "type": "submit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "name": "Create event",
+        "actionHost": "calendar.google.com",
+        "actionPath": "/calendar/u/0/r",
+        "fieldCount": 4,
+        "via": "button"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Investor meeting request: Horizon Capital \u2014 8:00 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Save",
+        "semanticType": "calendar_event"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0069",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-noise-30",
+      "timestamp": 1789672800000,
+      "sequence": 69,
+      "tabId": 30,
+      "frameId": 0,
+      "type": "nav",
+      "host": "kayak.com",
+      "path": "/",
+      "title": "Flights to New York",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Flights to New York"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0070",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-noise-30",
+      "timestamp": 1789672812000,
+      "sequence": 70,
+      "tabId": 30,
+      "frameId": 0,
+      "type": "click",
+      "host": "kayak.com",
+      "path": "/",
+      "title": "Flights to New York",
+      "detail": {
+        "tag": "A",
+        "role": "link",
+        "label": "Open"
+      },
+      "context": {
+        "pageTitle": "Flights to New York",
+        "targetLabel": "Open"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0071",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-17-noise-30",
+      "timestamp": 1789672830000,
+      "sequence": 71,
+      "tabId": 30,
+      "frameId": 0,
+      "type": "scroll",
+      "host": "kayak.com",
+      "path": "/",
+      "title": "Flights to New York",
+      "detail": {
+        "depth": 50
+      },
+      "context": {
+        "pageTitle": "Flights to New York"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0072",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-receipt-amtrak",
+      "timestamp": 1789736400000,
+      "sequence": 72,
+      "tabId": 31,
+      "frameId": 0,
+      "type": "nav",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Gmail"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0073",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-receipt-amtrak",
+      "timestamp": 1789736408000,
+      "sequence": 73,
+      "tabId": 31,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "DIV",
+        "role": "main",
+        "label": "Amtrak receipt \u2014 Northeast Regional"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Amtrak receipt \u2014 Northeast Regional",
+        "sectionLabel": "Inbox",
+        "targetLabel": "Amtrak receipt \u2014 Northeast Regional",
+        "semanticType": "receipt"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0074",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-receipt-amtrak",
+      "timestamp": 1789736420000,
+      "sequence": 74,
+      "tabId": 31,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "SPAN",
+        "role": "text",
+        "label": "Total"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Amtrak receipt \u2014 Northeast Regional",
+        "sectionLabel": "Receipt",
+        "targetLabel": "Total",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0075",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-receipt-amtrak",
+      "timestamp": 1789736428000,
+      "sequence": 75,
+      "tabId": 31,
+      "frameId": 0,
+      "type": "copy",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "length": 6,
+        "wordCount": 1
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Amtrak receipt \u2014 Northeast Regional",
+        "sectionLabel": "Receipt",
+        "targetLabel": "Total",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0076",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-receipt-amtrak",
+      "timestamp": 1789736448000,
+      "sequence": 76,
+      "tabId": 32,
+      "frameId": 0,
+      "type": "nav",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "referrerHost": "mail.google.com"
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "semanticType": "spreadsheet"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0077",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-receipt-amtrak",
+      "timestamp": 1789736463000,
+      "sequence": 77,
+      "tabId": 32,
+      "frameId": 0,
+      "type": "paste",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "length": 6,
+        "targetTag": "DIV",
+        "targetName": "Amount"
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "targetLabel": "Amount",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0078",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-receipt-amtrak",
+      "timestamp": 1789736472000,
+      "sequence": 78,
+      "tabId": 32,
+      "frameId": 0,
+      "type": "edit",
+      "host": "docs.google.com",
+      "path": "/spreadsheets/d/demo-expenses/",
+      "title": "Executive Office Expenses - Google Sheets",
+      "detail": {
+        "tag": "DIV",
+        "inputType": "text",
+        "name": "Amount",
+        "length": 6
+      },
+      "context": {
+        "pageTitle": "Executive Office Expenses",
+        "itemTitle": "Executive Office Expenses",
+        "sectionLabel": "September",
+        "targetLabel": "Amount",
+        "semanticType": "currency"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0079",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-calendar-meeting-request:-q4-planning-\u2014-9:30-am",
+      "timestamp": 1789740900000,
+      "sequence": 79,
+      "tabId": 33,
+      "frameId": 0,
+      "type": "nav",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Gmail"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0080",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-calendar-meeting-request:-q4-planning-\u2014-9:30-am",
+      "timestamp": 1789740907000,
+      "sequence": 80,
+      "tabId": 33,
+      "frameId": 0,
+      "type": "click",
+      "host": "mail.google.com",
+      "path": "/mail/u/0/",
+      "title": "Gmail",
+      "detail": {
+        "tag": "DIV",
+        "role": "main",
+        "label": "Meeting request: Q4 planning \u2014 9:30 AM"
+      },
+      "context": {
+        "pageTitle": "Gmail",
+        "itemTitle": "Meeting request: Q4 planning \u2014 9:30 AM",
+        "sectionLabel": "Inbox",
+        "targetLabel": "Meeting request: Q4 planning \u2014 9:30 AM",
+        "semanticType": "scheduling_request",
+        "nearbyText": "Requested time: 9:30 AM"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0081",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-calendar-meeting-request:-q4-planning-\u2014-9:30-am",
+      "timestamp": 1789740926000,
+      "sequence": 81,
+      "tabId": 34,
+      "frameId": 0,
+      "type": "nav",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "referrerHost": "mail.google.com"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "sectionLabel": "Week view",
+        "semanticType": "calendar"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0082",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-calendar-meeting-request:-q4-planning-\u2014-9:30-am",
+      "timestamp": 1789740935000,
+      "sequence": 82,
+      "tabId": 34,
+      "frameId": 0,
+      "type": "click",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "BUTTON",
+        "role": "button",
+        "label": "Create"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "formLabel": "Create event",
+        "targetLabel": "Create",
+        "semanticType": "calendar_event"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0083",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-calendar-meeting-request:-q4-planning-\u2014-9:30-am",
+      "timestamp": 1789740949000,
+      "sequence": 83,
+      "tabId": 34,
+      "frameId": 0,
+      "type": "edit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "INPUT",
+        "inputType": "text",
+        "name": "Title",
+        "length": 38
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Q4 planning \u2014 9:30 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Title",
+        "semanticType": "external_meeting"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0084",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-calendar-meeting-request:-q4-planning-\u2014-9:30-am",
+      "timestamp": 1789740961000,
+      "sequence": 84,
+      "tabId": 34,
+      "frameId": 0,
+      "type": "edit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "tag": "INPUT",
+        "inputType": "text",
+        "name": "Start time",
+        "length": 5
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Q4 planning \u2014 9:30 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Start time",
+        "semanticType": "datetime",
+        "nearbyText": "Selected 10:30 AM slot"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0085",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-calendar-meeting-request:-q4-planning-\u2014-9:30-am",
+      "timestamp": 1789740978000,
+      "sequence": 85,
+      "tabId": 34,
+      "frameId": 0,
+      "type": "submit",
+      "host": "calendar.google.com",
+      "path": "/calendar/u/0/r",
+      "title": "Google Calendar",
+      "detail": {
+        "name": "Create event",
+        "actionHost": "calendar.google.com",
+        "actionPath": "/calendar/u/0/r",
+        "fieldCount": 4,
+        "via": "button"
+      },
+      "context": {
+        "pageTitle": "Google Calendar",
+        "itemTitle": "Q4 planning \u2014 9:30 AM",
+        "formLabel": "Create event",
+        "targetLabel": "Save",
+        "semanticType": "calendar_event"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0086",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-noise-35",
+      "timestamp": 1789756200000,
+      "sequence": 86,
+      "tabId": 35,
+      "frameId": 0,
+      "type": "nav",
+      "host": "docs.google.com",
+      "path": "/",
+      "title": "Executive Team Notes - Google Docs",
+      "detail": {
+        "referrerHost": ""
+      },
+      "context": {
+        "pageTitle": "Executive Team Notes - Google Docs"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0087",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-noise-35",
+      "timestamp": 1789756212000,
+      "sequence": 87,
+      "tabId": 35,
+      "frameId": 0,
+      "type": "click",
+      "host": "docs.google.com",
+      "path": "/",
+      "title": "Executive Team Notes - Google Docs",
+      "detail": {
+        "tag": "A",
+        "role": "link",
+        "label": "Open"
+      },
+      "context": {
+        "pageTitle": "Executive Team Notes - Google Docs",
+        "targetLabel": "Open"
+      }
+    },
+    {
+      "schemaVersion": 1,
+      "id": "mia-demo-0088",
+      "installId": "__INSTALL_ID__",
+      "sessionId": "session-2026-09-18-noise-35",
+      "timestamp": 1789756230000,
+      "sequence": 88,
+      "tabId": 35,
+      "frameId": 0,
+      "type": "scroll",
+      "host": "docs.google.com",
+      "path": "/",
+      "title": "Executive Team Notes - Google Docs",
+      "detail": {
+        "depth": 50
+      },
+      "context": {
+        "pageTitle": "Executive Team Notes - Google Docs"
+      }
+    }
+  ]
+}

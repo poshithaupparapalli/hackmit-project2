@@ -1,0 +1,12 @@
+TO: your connected Gmail account
+LABEL BEFORE DEMO: mia-demo-calendar
+
+Subject: Meeting request — Meridian Ventures
+
+Please use a CONTROLLED email address that you own for the attendee before the live demo.
+
+Title: Meridian Ventures Partnership Discussion
+Start: 2026-09-21T14:00:00-04:00
+End: 2026-09-21T14:45:00-04:00
+Attendees: REPLACE_WITH_YOUR_CONTROLLED_EMAIL@example.com
+Location: Zoom
