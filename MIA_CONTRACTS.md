@@ -634,8 +634,14 @@ For v1, executable workflows are a controlled set.
 
 ```ts
 type WorkflowKey =
-  | "gmail_to_sheet";
+  | "gmail_to_sheet"
+  | "email_to_calendar"
+  | "inbox_triage";
 ```
+
+The set grows only by the additive, pinged change described in **B7** (agent tool
+first, then the literal + analyst mapping). Any other detected workflow is
+`null`.
 
 Suggestions use:
 
@@ -1235,8 +1241,8 @@ tool(s) on the agent side and (for a new key) extending the controlled
 | Priority | workflowKey | Description | Scopes / auth | Status |
 |----------|-------------|-------------|---------------|--------|
 | 1 | `gmail_to_sheet` | Read a receipt/expense email, append a row to a Sheet. | `gmail.readonly` + `spreadsheets` | building |
-| 2 | `email_to_calendar` | Read an email, create a Google Calendar event from it. | `gmail.readonly` + `calendar.events` | planned |
-| 3 | `inbox_triage` | Read unread emails, categorize, draft replies. Draft only; **sending requires approval via B5**. | `gmail.readonly` (+ `gmail.compose` if drafting) | planned |
+| 2 | `email_to_calendar` | Read an email, create a Google Calendar event from it. | `gmail.readonly` + `calendar.events` | working |
+| 3 | `inbox_triage` | Read unread emails, categorize, draft replies. Draft only; **sending requires approval via B5**. | `gmail.readonly` (+ `gmail.compose` if drafting) | building |
 | 4 | `slack_post` | Post / summarize a message to Slack. | Slack OAuth (separate from Google) | planned |
 | 5 | `notion_file` | File notes / tasks into a Notion database. | Notion token | planned |
 | 6 | `email_to_calendar_to_slack` | Multi-step chain across apps (email → calendar → Slack). | Google + Slack | planned |
@@ -1582,11 +1588,13 @@ Poshitha
 POST /v1/workflows/:workflowKey/run
 ```
 
-For v1:
+Controlled set (A12):
 
 ```text
-workflowKey = "gmail_to_sheet"
+workflowKey = "gmail_to_sheet" | "email_to_calendar" | "inbox_triage"
 ```
+
+Only rows at `working` in the B7 registry are demoed as executable.
 
 ---
 

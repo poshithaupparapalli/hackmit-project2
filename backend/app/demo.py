@@ -1,5 +1,6 @@
-"""DEMO_MODE support (B6). Prerecorded receipt-run events are seeded into the
-event DB so the miner -> analyst pipeline produces the suggestion with no live
+"""DEMO_MODE support (B6). Prerecorded events for each pattern family (receipt
+loop, meeting invites, inbox triage) are seeded into the event DB so the miner
+-> analyst pipeline produces one suggestion per B7 workflow with no live
 capture. Default analysis in demo mode uses the heuristic analyst so the demo
 works with no network; set DEMO_LLM=true to opt back into OpenAI.
 """

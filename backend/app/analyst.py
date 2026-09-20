@@ -20,23 +20,28 @@ ANALYZE_EVERY_MS = 30 * 60 * 1000
 
 # Workflow registry (contract B7): one entry per executable workflowKey.
 # Adding a workflow = one registry entry + one Literal member in models.py.
-# NOTE: both "keywords_any" and "keywords_all" are matched with any() below —
-# they represent two independent evidence groups (source-app signal, and
-# destination-app/action signal), not a literal all-of. A suggestion maps to
-# a workflowKey only when it has at least one hit in EACH group.
+# Order matters: entries are tried top-down, so the most specific (two-app)
+# profiles come first. "keywords_all" is a second required keyword group; an
+# empty group means the profile is decided by "keywords_any" alone.
 WORKFLOW_REGISTRY: dict[str, dict] = {
     "gmail_to_sheet": {
         "keywords_any": ("gmail", "mail.google", "receipt", "email"),
         "keywords_all": ("sheet", "spreadsheet", "docs.google"),
     },
     "email_to_calendar": {
-        "keywords_any": ("gmail", "mail.google", "email", "meeting", "invite", "invitation"),
-        "keywords_all": ("calendar", "event", "schedule"),
+        # No bare "event": it matches "Gmail events" in unrelated evidence.
+        "keywords_any": ("calendar", "meeting", "invite", "invitation"),
+        "keywords_all": (),
+    },
+    "inbox_triage": {
+        "keywords_any": ("unread", "triage", "inbox", "reply", "draft", "archive"),
+        "keywords_all": (),
     },
 }
 
 GMAIL_HOSTS = ("mail.google.com", "gmail")
 SHEET_HOSTS = ("docs.google.com", "sheets")
+CALENDAR_HOSTS = ("calendar.google.com", "calendar")
 
 
 def new_events_pending(conn: sqlite3.Connection) -> int:
@@ -162,18 +167,25 @@ def _is_sheet(host: str) -> bool:
     return any(s in (host or "") for s in SHEET_HOSTS)
 
 
-def _specific_sheet_name(digest) -> str:
-    """Choose a bounded observed sheet title for the offline suggestion."""
-    generic = {"google sheets", "sheets", "spreadsheet"}
+def _is_calendar(host: str) -> bool:
+    return any(c in (host or "") for c in CALENDAR_HOSTS)
+
+
+_HINT_KEYS = ("pageTitle", "itemTitle", "sectionLabel", "formLabel",
+              "targetLabel", "nearbyText", "semanticType")
+
+
+def _specific_destination(digest, host_test, generic: set[str]) -> str:
+    """Choose a bounded observed title for a host family (e.g. the sheet name)."""
     for hint in digest.get("contextHints", []):
-        if not _is_sheet(hint.get("host", "")):
+        if not host_test(hint.get("host", "")):
             continue
         for key in ("pageTitle", "itemTitle"):
             value = str(hint.get(key) or "").strip()
             if value and value.lower() not in generic:
                 return value
     for host in digest.get("hosts", []):
-        if not _is_sheet(host.get("host", "")):
+        if not host_test(host.get("host", "")):
             continue
         for value in host.get("topTitles", []):
             value = str(value or "").strip()
@@ -182,19 +194,71 @@ def _specific_sheet_name(digest) -> str:
     return ""
 
 
-def _heuristic_suggestions(digest, motifs, semantic) -> list[dict]:
-    """Build the receipt-loop suggestion from mined evidence, no LLM needed."""
-    cp = next(
-        (p for p in digest["copyPaste"] if _is_gmail(p["from"]) and _is_sheet(p["to"])),
+def _specific_sheet_name(digest) -> str:
+    return _specific_destination(
+        digest, _is_sheet, {"google sheets", "sheets", "spreadsheet"}
+    )
+
+
+def _matching_hints(digest, host_test, keywords) -> list[dict]:
+    """contextHints on a host family whose bounded labels mention a keyword."""
+    out = []
+    for hint in digest.get("contextHints", []):
+        if not host_test(hint.get("host", "")):
+            continue
+        text = " ".join(str(hint.get(k) or "") for k in _HINT_KEYS).lower()
+        if any(k in text for k in keywords):
+            out.append(hint)
+    return out
+
+
+def _hint_label(hint) -> str:
+    for key in ("itemTitle", "targetLabel", "formLabel", "sectionLabel", "pageTitle"):
+        value = str(hint.get(key) or "").strip()
+        if value:
+            return value
+    return ""
+
+
+def _copy_paste(digest, from_test, to_test) -> dict | None:
+    return next(
+        (p for p in digest["copyPaste"] if from_test(p["from"]) and to_test(p["to"])),
         None,
     )
-    trans = next(
+
+
+def _transition(digest, a_test, b_test) -> dict | None:
+    return next(
         (t for t in digest["transitions"]
-         if any(_is_gmail(h) for h in t["path"]) and any(_is_sheet(h) for h in t["path"])),
+         if any(a_test(h) for h in t["path"]) and any(b_test(h) for h in t["path"])),
         None,
     )
+
+
+def _host_stat(digest, host_test) -> dict | None:
+    return next((s for s in digest["hosts"] if host_test(s["host"])), None)
+
+
+def _heuristic_suggestions(digest, motifs, semantic) -> list[dict]:
+    """Offline analyst: one suggestion per pattern family present in the digest.
+
+    Each generator returns None when its evidence is absent, so a digest with
+    only receipt activity still yields exactly the receipt suggestion.
+    """
+    out = [
+        _receipt_suggestion(digest, semantic),
+        _calendar_suggestion(digest),
+        _triage_suggestion(digest),
+    ]
+    return [s for s in out if s][:4]
+
+
+def _receipt_suggestion(digest, semantic) -> dict | None:
+    """Build the receipt-loop suggestion from mined evidence, no LLM needed."""
+    cp = _copy_paste(digest, _is_gmail, _is_sheet)
+    trans = _transition(digest, _is_gmail, _is_sheet)
     if not cp and not trans:
-        return []
+        return None
     count = (cp or trans)["count"]
     # Semantic evidence leads (what the user was actually doing); mechanical
     # counts are supporting detail only, appended after — never the headline.
@@ -216,7 +280,7 @@ def _heuristic_suggestions(digest, motifs, semantic) -> list[dict]:
     sheet_name = _specific_sheet_name(digest)
     destination = f'"{sheet_name}"' if sheet_name else "your expense sheet"
     title = f"Log receipt totals into {sheet_name}" if sheet_name else "Log receipt emails to your expense sheet"
-    return [{
+    return {
         "kind": "workflow",
         "title": title,
         "summary": f"Mia noticed you repeatedly copy receipt totals from Gmail into {destination}. She can do this for you when you choose to run it.",
@@ -232,7 +296,87 @@ def _heuristic_suggestions(digest, motifs, semantic) -> list[dict]:
         "buildPrompt": f"Read receipt emails via Gmail API, extract the amount, append a row via Sheets API to {destination}.",
         "confidence": min(0.5 + 0.1 * count, 0.95),
         "timeSavedPerWeekMinutes": 5 * count,
-    }]
+    }
+
+
+def _calendar_suggestion(digest) -> dict | None:
+    """Gmail invite -> Google Calendar event loop (B7 email_to_calendar)."""
+    cp = _copy_paste(digest, _is_gmail, _is_calendar)
+    trans = _transition(digest, _is_gmail, _is_calendar)
+    if not cp and not trans:
+        return None
+    count = (cp or trans)["count"]
+    evidence = []
+    if cp:
+        evidence.append(f"Copied from {cp['from']} and pasted into {cp['to']} {cp['count']} times")
+    if trans:
+        evidence.append(f"Repeated sequence {' -> '.join(trans['path'])} seen {trans['count']} times")
+    invite = next(
+        (h for h in _matching_hints(digest, _is_gmail, ("invite", "invitation", "meeting"))
+         if h.get("itemTitle")),
+        None,
+    )
+    if invite:
+        evidence.append(
+            f"Opened invitation '{invite['itemTitle']}' in Gmail {invite['count']} times"
+        )
+    evidence = evidence[:3] or [f"Repeated gmail-to-calendar activity {count} times"]
+    cal_name = _specific_destination(digest, _is_calendar, {"google calendar", "calendar"})
+    destination = f'"{cal_name}"' if cal_name else "your Google Calendar"
+    title = f"Add meeting invites to {cal_name}" if cal_name else "Create calendar events from meeting emails"
+    return {
+        "kind": "workflow",
+        "title": title,
+        "summary": f"Mia noticed you retype meeting details from Gmail invites into {destination}. She can create the event for you when you choose to run it.",
+        "evidence": evidence,
+        "steps": [
+            "Open the meeting invitation email in Gmail",
+            "Read the title, date and time",
+            "Open Google Calendar",
+            "Create the event with those details",
+        ],
+        "trigger": "",
+        "action": f"Read the latest meeting invitation email and create the matching event in {destination}.",
+        "buildPrompt": f"Read invitation emails via Gmail API, extract title/start/end, create an event via Calendar API in {destination}.",
+        "confidence": min(0.5 + 0.1 * count, 0.9),
+        "timeSavedPerWeekMinutes": 4 * count,
+    }
+
+
+def _triage_suggestion(digest) -> dict | None:
+    """Unread-inbox read/reply/file loop, single app (B7 inbox_triage)."""
+    hits = _matching_hints(digest, _is_gmail, ("unread", "reply", "draft", "archive", "triage"))
+    total = sum(h["count"] for h in hits)
+    if total < 3:
+        return None
+    stat = _host_stat(digest, _is_gmail)
+    evidence, seen = [], set()
+    for hint in hits:
+        label = _hint_label(hint)
+        if not label or label.lower() in seen or len(evidence) >= 2:
+            continue
+        seen.add(label.lower())
+        evidence.append(f"Used '{label}' in Gmail {hint['count']} times")
+    if stat and len(evidence) < 3:
+        evidence.append(f"{stat['events']} Gmail actions across {stat['days']} days")
+    evidence = evidence[:3] or [f"Repeated unread-inbox handling {total} times"]
+    return {
+        "kind": "workflow",
+        "title": "Triage unread mail and draft the replies",
+        "summary": "Mia noticed you work through unread threads the same way: read, reply, file. She can sort them and draft the replies for you — drafts only, never sent without your approval.",
+        "evidence": evidence,
+        "steps": [
+            "List the unread threads in the inbox",
+            "Group them by what they need",
+            "Draft a reply for the ones that need an answer",
+            "Leave every draft for you to review before sending",
+        ],
+        "trigger": "",
+        "action": "Read unread Gmail threads, categorize them, and save a draft reply for each one that needs an answer.",
+        "buildPrompt": "Read unread threads via Gmail API, categorize them, create draft replies via Gmail API. Never send without explicit approval.",
+        "confidence": min(0.45 + 0.02 * total, 0.85),
+        "timeSavedPerWeekMinutes": min(2 * total, 40),
+    }
 
 
 # ---------- workflowKey mapping (A12) ----------
@@ -270,10 +414,12 @@ def _determine_workflow_key(s: dict, digest) -> str | None:
         + _string_list(s.get("steps")) + _string_list(s.get("evidence"))
     ).lower()
     for key, spec in WORKFLOW_REGISTRY.items():
-        if any(k in text for k in spec["keywords_any"]) and any(
-            k in text for k in spec["keywords_all"]
-        ):
-            return key
+        if not any(k in text for k in spec["keywords_any"]):
+            continue
+        required = spec.get("keywords_all") or ()
+        if required and not any(k in text for k in required):
+            continue
+        return key
     return None
 
 
