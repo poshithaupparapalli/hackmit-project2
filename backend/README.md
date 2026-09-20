@@ -17,7 +17,8 @@ cp .env.example .env   # fill in OPENAI_API_KEY
 uvicorn app.main:app --reload --port 8000
 ```
 
-Demo mode (seeds prerecorded receipt events, produces the suggestion offline):
+Demo mode (seeds prerecorded receipt / meeting-invite / inbox-triage events and
+produces one suggestion per B7 workflow offline):
 
 ```bash
 DEMO_MODE=true uvicorn app.main:app --port 8000

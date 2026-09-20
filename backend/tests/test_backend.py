@@ -104,6 +104,36 @@ def test_receipt_suggestion(client, auth):
     assert sug["title"] in titles
 
 
+def test_demo_seed_produces_all_working_workflow_keys(client, auth):
+    """B7: each pattern family in the fallback dataset gets its own runnable key."""
+    _seed_receipt_events(client, *auth)
+    from app.analyst import run_analysis
+    from app.db import get_conn
+    created = run_analysis(get_conn(), use_llm=False)
+    keys = {s["workflowKey"] for s in created}
+    assert keys == {"gmail_to_sheet", "email_to_calendar", "inbox_triage"}
+    for sug in created:
+        assert 1 <= len(sug["evidence"]) <= 3
+        assert sug["steps"] and sug["confidence"] > 0
+
+
+def test_workflow_key_mapping_separates_the_three_profiles():
+    """A12: the backend assigns the key; profiles must not bleed into each other."""
+    from app.analyst import _determine_workflow_key
+
+    def key(**s):
+        return _determine_workflow_key(s, {})
+
+    assert key(title="Log receipt totals into Expense Tracker",
+               summary="Copy receipt totals from Gmail into the sheet") == "gmail_to_sheet"
+    assert key(title="Add meeting invites to Fall 2026 Schedule",
+               summary="Create the calendar event from the invitation email") == "email_to_calendar"
+    assert key(title="Triage unread mail and draft the replies",
+               evidence=["42 Gmail actions across 3 days"]) == "inbox_triage"
+    assert key(title="Book the weekly tennis court",
+               summary="Reserve a court on the rec site") is None
+
+
 # --- tests 13/14/15: status + feedback persistence ---
 
 def test_dismiss_restore_persists(client, auth):
