@@ -26,6 +26,13 @@ from .runner import WorkflowRun
 
 app = FastAPI(title="MIA Agent (execution)", version="1.0")
 
+# Auto-discover and register workflow modules in agent/workflows/ on startup, so
+# launching normally (uvicorn agent.server:app) picks up every workflow —
+# gmail_to_sheet (built into the runner) plus anything under agent/workflows/.
+_REGISTERED = runner.discover_workflows()
+print(f"[agent] workflows available: {sorted(runner.WORKFLOWS)} "
+      f"(discovered from agent/workflows/: {_REGISTERED})")
+
 # Ryan's frontend calls this directly; wide-open CORS is fine for the demo.
 app.add_middleware(
     CORSMiddleware,

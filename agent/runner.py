@@ -182,6 +182,38 @@ def is_known_workflow(workflow_key: str) -> bool:
     return workflow_key in WORKFLOWS
 
 
+def discover_workflows() -> list[str]:
+    """Import every module in agent/workflows/ and call its register() if present.
+
+    Lets new workflow files load automatically on server startup with no edits to
+    shared code. Only ADDS registrations — gmail_to_sheet (defined in this module)
+    is never touched. A broken or import-failing workflow module is skipped with a
+    warning rather than taking down the server. Idempotent: safe to call more than
+    once, and safe even if a module also self-registers on import.
+    """
+    import importlib
+    import pkgutil
+
+    from . import workflows as workflows_pkg
+
+    discovered: list[str] = []
+    for modinfo in pkgutil.iter_modules(workflows_pkg.__path__):
+        name = modinfo.name
+        if name.startswith("_") or name.startswith("test_"):
+            continue
+        full = f"{workflows_pkg.__name__}.{name}"
+        try:
+            module = importlib.import_module(full)
+            reg = getattr(module, "register", None)
+            if callable(reg):
+                reg()
+        except Exception as exc:  # noqa: BLE001 — one bad workflow must not break others
+            print(f"[workflows] skipped {full}: {type(exc).__name__}: {exc}")
+            continue
+        discovered.append(name)
+    return discovered
+
+
 # ---------------------------------------------------------------------------
 # Public API used by the FastAPI layer
 # ---------------------------------------------------------------------------
