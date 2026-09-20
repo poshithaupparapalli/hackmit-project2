@@ -134,7 +134,10 @@ def execute(ctx: runner.RunContext, suggestion_id: str) -> dict:
     active = STEP_LABELS[0]
     try:
         ctx.start_step(active)
-        msg = read_gmail(os.getenv("MIA_CALENDAR_GMAIL_QUERY") or config.GMAIL_TEST_QUERY)
+        # Calendar has its own safe default; never fall back to the receipt
+        # query or a broad inbox search when the demo env is not configured.
+        query = os.getenv("MIA_CALENDAR_GMAIL_QUERY", "subject:meeting")
+        msg = read_gmail(query)
         ctx.finish_step(active)
         active = STEP_LABELS[1]
         ctx.start_step(active)

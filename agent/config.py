@@ -52,7 +52,10 @@ CALENDAR_ID = os.getenv("MIA_CALENDAR_ID", "primary")
 # OR invoice OR total)") so a quiet inbox doesn't attempt a run on every email.
 # A non-matching email still fails safely (extract_receipt just errors, never
 # writes bad data) but it's noisy and burns API calls for no reason.
-GMAIL_TEST_QUERY = os.getenv("MIA_GMAIL_TEST_QUERY", "in:inbox")
+# Keep the receipt workflow deterministic by default. A broad inbox query can
+# select an unrelated newsletter and make a valid run fail during extraction.
+# Override this for a custom demo mailbox with MIA_GMAIL_TEST_QUERY.
+GMAIL_TEST_QUERY = os.getenv("MIA_GMAIL_TEST_QUERY", "subject:receipt")
 
 # --- Auto-run (B2 extension: execute an ACCEPTED workflow automatically when
 # new matching input appears, instead of waiting for a manual Run click).
