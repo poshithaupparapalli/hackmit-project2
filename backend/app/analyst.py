@@ -17,6 +17,16 @@ from app.models import Suggestion
 
 MIN_NEW_EVENTS = 25
 ANALYZE_EVERY_MS = 30 * 60 * 1000
+
+# Workflow registry (contract B7): one entry per executable workflowKey.
+# Adding a workflow = one registry entry + one Literal member in models.py.
+WORKFLOW_REGISTRY: dict[str, dict] = {
+    "gmail_to_sheet": {
+        "keywords_any": ("gmail", "mail.google", "receipt", "email"),
+        "keywords_all": ("sheet", "spreadsheet", "docs.google"),
+    },
+}
+
 GMAIL_HOSTS = ("mail.google.com", "gmail")
 SHEET_HOSTS = ("docs.google.com", "sheets")
 
@@ -166,14 +176,17 @@ def _heuristic_suggestions(digest, motifs, semantic) -> list[dict]:
 # ---------- workflowKey mapping (A12) ----------
 
 def _determine_workflow_key(s: dict, digest) -> str | None:
+    """Backend decides the key (A12) — LLM output is only a hint. A suggestion
+    maps to a workflow when its text matches that workflow's keyword profile."""
     text = " ".join(
         [s.get("title", ""), s.get("summary", ""), s.get("action", "")]
         + s.get("steps", []) + s.get("evidence", [])
     ).lower()
-    gmail = any(k in text for k in ("gmail", "mail.google", "receipt", "email"))
-    sheet = any(k in text for k in ("sheet", "spreadsheet", "docs.google"))
-    if gmail and sheet:
-        return "gmail_to_sheet"
+    for key, spec in WORKFLOW_REGISTRY.items():
+        if any(k in text for k in spec["keywords_any"]) and any(
+            k in text for k in spec["keywords_all"]
+        ):
+            return key
     return None
 
 

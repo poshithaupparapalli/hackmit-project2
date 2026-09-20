@@ -6,7 +6,13 @@ venv/
 
 # Secrets — never commit
 .env
+.env.*
 backend/.env
+
+# Agent (Poshitha) secrets — OAuth client + tokens, never commit
+agent/secrets/
+*client_secret*.json
+*token*.json
 
 # Local data
 backend/data/mia.db
