@@ -2,7 +2,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Mia design tokens — kept in sync with src/components/mia/mia-theme.css by
-   value (extension pages can't import across the repo, so this is a copy). */
+   value (extension pages can't import across the repo, so this is a copy).
+   The --mia-aurora-* and --mia-veil values are additions for this panel's
+   animated background; everything above them mirrors the shared theme. */
 :root {
   --mia-font-display: 'Fraunces', Georgia, 'Iowan Old Style', serif;
   --mia-font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -33,34 +35,101 @@
   --mia-grad-mid: #f3ebfb;
   --mia-shadow-rgb: 80 60 160;
 
+  /* Added for the drifting background. Saturated lilacs so the purple reads
+     clearly against the white it drifts over; the veil below keeps the middle
+     of the panel — where the small text lives — closer to white. */
+  --mia-aurora-1: #b393ea;
+  --mia-aurora-2: #8f6fdd;
+  --mia-aurora-3: #c4a6f6;
+  --mia-aurora-4: #d9c2fb;
+  --mia-veil: rgba(255, 255, 255, 0.5);
+
+  /* Deeper members of the same lilac family, for secondary text and links
+     that sit DIRECTLY on the gradient rather than on a white card.
+     --mia-ink-soft is only 4.75:1 on white, so it disappears over the
+     stronger purple; these hold above 4.5:1 across the whole sweep. */
+  --mia-ink-soft-strong: #4a3a63;
+  --mia-lilac-strong: #52398f;
+
   font-family: var(--mia-font-body);
   color: var(--mia-ink);
-  background: var(--mia-paper);
   font-size: 14px;
   line-height: 1.5;
   color-scheme: light;
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 280px; background: linear-gradient(180deg, var(--mia-grad-mid), var(--mia-paper) 240px); }
+html { background: var(--mia-paper); }
+body { margin: 0; min-width: 280px; background: transparent; }
+
+/* ── drifting lilac background ──────────────────────────────────────────
+   Each blob is its own composited layer: the blur is rasterised once and
+   only `transform` animates, so a panel left open all day costs no repaints.
+   The veil on top keeps body-level text at full contrast. */
+.aurora {
+  position: fixed; inset: 0; z-index: 0;
+  overflow: hidden; pointer-events: none;
+  background: var(--mia-paper);
+}
+.aurora span {
+  position: absolute; display: block;
+  border-radius: 50%;
+  filter: blur(58px);
+  will-change: transform;
+}
+.aurora span:nth-child(1) { width: 340px; height: 340px; top: -130px; left: -70px; background: var(--mia-aurora-1); opacity: 0.92; animation: mia-drift-a 30s ease-in-out infinite; }
+.aurora span:nth-child(2) { width: 280px; height: 280px; top: 6%; right: -130px; background: var(--mia-aurora-2); opacity: 0.62; animation: mia-drift-b 39s ease-in-out infinite; }
+.aurora span:nth-child(3) { width: 360px; height: 360px; bottom: -180px; left: -100px; background: var(--mia-aurora-3); opacity: 0.92; animation: mia-drift-c 47s ease-in-out infinite; }
+.aurora span:nth-child(4) { width: 240px; height: 240px; bottom: 20%; right: -110px; background: var(--mia-aurora-4); opacity: 0.85; animation: mia-drift-d 56s ease-in-out infinite; }
+/* Shaped, not flat: the purple stays bold at the top and bottom edges while
+   the middle band — headings, muted copy, the settings accordion — keeps
+   enough white behind it for small text to stay readable. */
+.aurora::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(255, 255, 255, 0.2) 17%,
+    rgba(255, 255, 255, 0.44) 38%,
+    var(--mia-veil) 56%,
+    rgba(255, 255, 255, 0.42) 80%,
+    rgba(255, 255, 255, 0.08) 100%);
+}
+@keyframes mia-drift-a { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(110px, 70px, 0) scale(1.22); } }
+@keyframes mia-drift-b { 0%, 100% { transform: translate3d(0, 0, 0) scale(1.1); } 50% { transform: translate3d(-104px, -84px, 0) scale(0.86); } }
+@keyframes mia-drift-c { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(88px, -96px, 0) scale(1.18); } }
+@keyframes mia-drift-d { 0%, 100% { transform: translate3d(0, 0, 0) scale(0.92); } 50% { transform: translate3d(-76px, 64px, 0) scale(1.14); } }
+
+header, main, footer { position: relative; z-index: 1; }
+
+/* ── header ─────────────────────────────────────────────────────────── */
 
 header {
   position: sticky; top: 0;
-  background: color-mix(in srgb, var(--mia-paper) 90%, transparent);
-  backdrop-filter: blur(10px);
-  padding: 20px 20px 16px;
-  border-bottom: 1px solid var(--mia-border);
+  background: transparent;
+  backdrop-filter: blur(16px);
+  padding: 16px 18px 13px;
   z-index: 2;
+  /* Seamless at rest so the gradient runs unbroken from the very top; the
+     frosted tint fades in only once content is actually scrolled under the
+     header. Scroll-driven animations need Chrome 115+ and the manifest
+     already requires 120+. Where they are unsupported the 0s animation
+     settles on its end state, which is the old always-frosted header. */
+  animation: mia-header-settle linear both;
+  animation-timeline: scroll();
+  animation-range: 0 60px;
 }
-.brand { display: flex; gap: 12px; align-items: center; }
+@keyframes mia-header-settle {
+  from { background-color: transparent; box-shadow: none; }
+  to {
+    background-color: color-mix(in srgb, var(--mia-paper) 84%, transparent);
+    box-shadow: 0 6px 18px rgb(var(--mia-shadow-rgb) / 0.09);
+  }
+}
+.brand { display: flex; gap: 11px; align-items: center; }
 
-/* The shared Mia mark — same shape/palette as MiaAvatar.tsx's idle frame,
-   as a plain CSS/SVG mark so the extension (no React/framer-motion here)
-   still carries the same logo as the dashboard. */
-.mia-logo { position: relative; display: inline-flex; flex-shrink: 0; animation: mia-breathe 3.4s ease-in-out infinite; }
-.mia-logo-body { fill: var(--mia-whimsy); transition: fill 0.3s; }
-.mia-logo-eye { fill: var(--mia-ink); }
-.mia-logo-mouth { stroke: var(--mia-ink); stroke-width: 3; fill: none; stroke-linecap: round; }
+/* The real Mia brand mark. `paused` is toggled by sidepanel.js. */
+.mia-logo { position: relative; display: inline-flex; flex-shrink: 0; animation: mia-breathe 4.2s ease-in-out infinite; }
+.mia-logo img { display: block; width: 40px; height: 40px; }
 .mia-logo.paused { animation: none; filter: grayscale(0.6) opacity(0.65); }
 .mia-logo-badge {
   position: absolute; top: -1px; right: -1px;
@@ -68,81 +137,143 @@ header {
   background: var(--mia-competent);
   border: 2px solid var(--mia-paper-raised);
 }
-@keyframes mia-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes mia-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
 
-h1 { font-family: var(--mia-font-display); font-size: 22px; line-height: 1; margin: 0 0 4px; }
-.brand p { font-size: 11px; color: var(--mia-ink-soft); margin: 0; }
-.observation { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 12px; }
+h1 { font-family: var(--mia-font-display); font-size: 21px; line-height: 1; margin: 0 0 3px; }
+.brand p { font-size: 11px; color: var(--mia-ink-soft-strong); margin: 0; }
+.observation { display: flex; justify-content: space-between; align-items: center; margin-top: 13px; gap: 12px; }
 #observation-status { font-size: 13px; font-weight: 600; color: var(--mia-ink); }
 #observation-status::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--mia-competent); margin-right: 8px; }
 #observation-status.paused::before { background: var(--mia-caution); }
-.dashboard-link { display: inline-block; margin-top: 10px; font-size: 12px; color: var(--mia-lilac); text-decoration: none; }
-.dashboard-link:hover { text-decoration: underline; }
+a.quiet.dashboard-link { display: inline-block; margin-top: 7px; font-size: 12px; color: var(--mia-lilac-strong); text-decoration: none; padding: 0; }
+a.quiet.dashboard-link:hover { text-decoration: underline; }
 
-main { padding: 0 20px; }
-section { padding: 22px 0; border-bottom: 1px solid var(--mia-border); }
-h2 { font-family: var(--mia-font-display); font-size: 16px; margin: 0 0 12px; font-weight: 600; }
-h3 { font-size: 13px; margin: 18px 0 8px; }
-.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+/* ── sections ───────────────────────────────────────────────────────── */
+
+main { padding: 0 18px 4px; }
+section { padding: 16px 0; border-bottom: 1px solid var(--mia-border); }
+h2 { font-family: var(--mia-font-display); font-size: 16px; margin: 0 0 10px; font-weight: 600; }
+h3 { font-size: 13px; margin: 16px 0 7px; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
 .section-heading h2 { margin: 0; }
 .eyebrow { font-size: 10px; color: var(--mia-ink-faint); text-transform: uppercase; letter-spacing: 0.06em; }
+/* On the gradient, not on a card. */
+.section-heading .eyebrow { color: var(--mia-ink-soft-strong); }
+
+/* ── controls ───────────────────────────────────────────────────────── */
 
 button, input, textarea { font: inherit; font-family: var(--mia-font-body); }
 button {
   border: 1px solid var(--mia-border);
   background: var(--mia-paper-raised);
   color: var(--mia-ink);
-  border-radius: 10px;
-  padding: 7px 12px;
+  border-radius: 999px;
+  padding: 7px 15px;
   cursor: pointer;
   white-space: nowrap;
-  transition: transform 0.1s var(--mia-ease-snap, ease), background 0.15s;
+  box-shadow: 0 1px 2px rgb(var(--mia-shadow-rgb) / 0.05);
+  transition: transform 0.1s ease, background 0.15s, box-shadow 0.15s;
 }
-button:hover { transform: translateY(-1px); }
-button:disabled { opacity: 0.5; cursor: wait; transform: none; }
+button:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgb(var(--mia-shadow-rgb) / 0.1); }
+button:disabled { opacity: 0.5; cursor: wait; transform: none; box-shadow: none; }
 button.primary { background: var(--mia-action); color: var(--mia-action-fg); border-color: var(--mia-action); }
-button.quiet, a.quiet { border: 0; background: transparent; font-size: 12px; padding: 4px; color: var(--mia-ink-soft); }
-button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--mia-lilac); outline-offset: 3px; }
+button.quiet, a.quiet { border: 0; background: transparent; box-shadow: none; font-size: 12px; padding: 4px 6px; color: var(--mia-ink-soft); }
+button.quiet:hover { box-shadow: none; background: var(--mia-lilac-pale); }
+#refresh { color: var(--mia-ink-soft-strong); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--mia-lilac); outline-offset: 3px; border-radius: 8px; }
 
-.card { background: var(--mia-paper-raised); border: 1px solid var(--mia-border); border-radius: 16px; padding: 18px; margin-bottom: 12px; box-shadow: 0 6px 20px rgb(var(--mia-shadow-rgb) / 0.06); }
-.card h3 { font-family: var(--mia-font-display); font-size: 18px; line-height: 1.3; font-weight: 600; margin: 8px 0 10px; overflow-wrap: anywhere; }
-.card p { margin: 10px 0; color: var(--mia-ink-soft); font-size: 13px; }
-.card ul, .card ol { padding-left: 20px; font-size: 13px; color: var(--mia-ink-soft); }
-.card li { margin: 6px 0; }
-.card .confidence { font-size: 11px; color: var(--mia-ink-faint); margin-top: 16px; }
-.card-links { margin-top: 10px; }
-.actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
-.actions button { font-size: 12px; padding: 7px 11px; }
+/* ── suggestion card ────────────────────────────────────────────────── */
+
+.card { background: var(--mia-paper-raised); border: 1px solid var(--mia-border); border-radius: 18px; padding: 16px 17px; margin-bottom: 10px; box-shadow: 0 8px 24px rgb(var(--mia-shadow-rgb) / 0.07); }
+.card h3 { font-family: var(--mia-font-display); font-size: 17px; line-height: 1.28; font-weight: 600; margin: 7px 0 8px; overflow-wrap: anywhere; }
+.card p { margin: 8px 0; color: var(--mia-ink-soft); font-size: 13px; }
+.card ul, .card ol { padding-left: 19px; font-size: 12.5px; color: var(--mia-ink-soft); margin: 8px 0; }
+.card li { margin: 5px 0; }
+.card .confidence { font-size: 11px; color: var(--mia-ink-faint); margin-top: 12px; }
+.card-links { margin-top: 8px; display: inline-block; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 13px; align-items: center; }
+.actions button { font-size: 12px; padding: 7px 14px; }
 .card form { margin-top: 12px; }
-.card textarea { width: 100%; min-height: 90px; resize: vertical; }
+.card textarea { width: 100%; min-height: 84px; resize: vertical; }
 .card label { font-size: 12px; }
 
-.tag { display: inline-flex; align-items: center; font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--mia-lilac-pale); color: var(--mia-lilac); }
+/* Evidence + steps live behind this so the card's decision buttons stay on
+   the first screen. "See details →" is a link out to the dashboard, not a
+   toggle, so it could not gate them. */
+.card-detail { margin: 2px 0 0; padding: 0; font-size: 12px; color: var(--mia-ink-soft); }
+.card-detail > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; color: var(--mia-lilac); font-size: 12px; padding: 3px 0; }
+.card-detail > summary::-webkit-details-marker { display: none; }
+.card-detail[open] > summary { margin-bottom: 2px; }
+.card-detail > summary::before { content: ""; width: 6px; height: 6px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(-45deg); transition: transform 0.2s ease; }
+.card-detail[open] > summary::before { transform: rotate(45deg); }
 
-.notice { background: var(--mia-lilac-pale); color: var(--mia-lilac); padding: 10px 12px; border-radius: 10px; font-size: 12px; }
-.muted, .empty { font-size: 13px; color: var(--mia-ink-soft); }
-.footnote { font-size: 11px; color: var(--mia-ink-faint); }
+/* ── collapsed recent activity ──────────────────────────────────────── */
+
 .activity { padding: 0; margin: 0; list-style: none; }
-.activity li { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--mia-border); font-size: 12px; }
-.activity time { color: var(--mia-ink-faint); flex: 0 0 56px; font-size: 11px; white-space: nowrap; }
+.activity li { display: flex; gap: 10px; padding: 8px 12px; font-size: 12px; background: var(--mia-paper-raised); border: 1px solid var(--mia-border); border-radius: 12px; }
+.activity time { color: var(--mia-ink-faint); flex: 0 0 52px; font-size: 11px; white-space: nowrap; }
 .activity span { overflow-wrap: anywhere; }
-.domains { list-style: none; margin: 0 0 14px; padding: 0; }
+.activity-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 7px; }
+.activity-foot .quiet { color: var(--mia-lilac-strong); text-decoration: none; padding: 2px 0; }
+.activity-foot .quiet:hover { text-decoration: underline; }
+
+/* ── disclosure (Privacy & settings, diagnostics) ───────────────────── */
+
+.disclosure { border-top: 1px solid var(--mia-border); padding: 4px 0; font-size: 12px; color: var(--mia-ink-soft); }
+.disclosure > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 13px 0; }
+.disclosure > summary::-webkit-details-marker { display: none; }
+.disclosure-title { font-family: var(--mia-font-display); font-size: 14px; font-weight: 600; color: var(--mia-ink); }
+.chev { width: 8px; height: 8px; border-right: 1.6px solid var(--mia-ink-faint); border-bottom: 1.6px solid var(--mia-ink-faint); transform: rotate(45deg) translate(-2px, -2px); transition: transform 0.2s ease; }
+.disclosure[open] > summary .chev { transform: rotate(-135deg) translate(-2px, -2px); }
+/* The bottom of the panel is where the purple is strongest, and it is also
+   where the longest small-copy lives once this is expanded. A soft white
+   scrim lifts that text back over 4.5:1 without flattening the gradient,
+   which still shows through it and all around it. */
+.disclosure-body {
+  background: rgba(255, 255, 255, 0.62);
+  border-radius: 16px;
+  margin: 0 -14px;
+  padding: 4px 14px 16px;
+}
+#debug { border-top: 1px solid var(--mia-border); margin-top: 14px; }
+#debug .disclosure-title { font-size: 13px; }
+.disclosure .disclosure { border-top: 1px solid var(--mia-border); margin-top: 12px; }
+
+/* ── misc ───────────────────────────────────────────────────────────── */
+
+.tag { display: inline-flex; align-items: center; font-size: 11px; padding: 3px 9px; border-radius: 999px; background: var(--mia-lilac-pale); color: var(--mia-lilac); }
+.notice { background: var(--mia-lilac-pale); color: var(--mia-lilac); padding: 9px 12px; border-radius: 12px; font-size: 12px; margin: 12px 0 0; }
+.muted { font-size: 12.5px; color: var(--mia-ink-soft); }
+/* .empty and the activity count render on the gradient, never on a card. */
+.empty { font-size: 12.5px; color: var(--mia-ink-soft-strong); }
+#activity-count { color: var(--mia-ink-soft-strong); }
+.footnote { font-size: 11px; color: var(--mia-ink-faint); }
+.domains { list-style: none; margin: 0 0 12px; padding: 0; }
 .domains li { display: flex; align-items: center; justify-content: space-between; font-size: 12px; gap: 6px; padding: 5px 0; }
 .domains span { overflow-wrap: anywhere; }
-.domains button { padding: 2px 7px; border: 0; background: transparent; font-size: 17px; color: var(--mia-ink-faint); }
+.domains button { padding: 1px 8px; border: 0; background: transparent; box-shadow: none; font-size: 17px; color: var(--mia-ink-faint); }
+.domains button:hover { box-shadow: none; background: var(--mia-lilac-pale); }
 label { display: block; color: var(--mia-ink-soft); font-size: 11px; margin-bottom: 6px; }
 .input-row { display: flex; gap: 7px; }
-input, textarea { background: var(--mia-paper-raised); border: 1px solid var(--mia-border); border-radius: 10px; padding: 9px; min-width: 0; }
+input, textarea { background: var(--mia-paper-raised); border: 1px solid var(--mia-border); border-radius: 12px; padding: 9px 11px; min-width: 0; }
 input { width: 100%; font-size: 12px; }
-details { padding: 15px 0; font-size: 12px; color: var(--mia-ink-soft); }
+details details { padding: 10px 0 0; }
 summary { cursor: pointer; }
-dl { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; }
+dl { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; margin: 10px 0 12px; }
 dd { margin: 0; overflow-wrap: anywhere; }
-pre { max-height: 260px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 10px; background: var(--mia-paper-alt); padding: 10px; border-radius: 8px; }
-footer { text-align: center; font-size: 12px; color: var(--mia-ink-soft); padding: 25px 18px; font-family: var(--mia-font-display); }
-footer span { color: var(--mia-ink-faint); font-size: 10px; font-family: var(--mia-font-body); }
-#message { border-left: 3px solid var(--mia-competent); padding: 8px 10px; background: var(--mia-paper-alt); font-size: 12px; overflow-wrap: anywhere; border-radius: 0 8px 8px 0; }
+pre { max-height: 240px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 10px; background: var(--mia-paper-alt); padding: 10px; border-radius: 10px; margin-top: 8px; }
+footer { position: relative; text-align: center; font-size: 12px; color: var(--mia-ink); padding: 18px 18px 22px; font-family: var(--mia-font-display); }
+/* The footer lands in the deepest part of the gradient. A soft scrim inside
+   the footer's own stacking context sits above the aurora but below the text. */
+footer::before { content: ""; position: absolute; inset: -6px 0; z-index: -1;
+  background: radial-gradient(ellipse 62% 58% at 50% 50%, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.52) 52%, rgba(255, 255, 255, 0) 100%); }
+footer span { color: var(--mia-ink-soft-strong); font-size: 10px; font-family: var(--mia-font-body); }
+#message { border-left: 3px solid var(--mia-competent); padding: 8px 10px; background: var(--mia-paper-alt); font-size: 12px; overflow-wrap: anywhere; border-radius: 0 10px 10px 0; margin: 12px 0 0; }
 #message.error { border-color: #a55548; background: #f7eae5; color: #894b3e; }
 [hidden] { display: none !important; }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } .mia-logo { animation: none; } }
-:focus { scroll-margin-top: 160px; }
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto; }
+  .mia-logo, .aurora span { animation: none; }
+  .chev, button { transition: none; }
+}
+:focus { scroll-margin-top: 150px; }

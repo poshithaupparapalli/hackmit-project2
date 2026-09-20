@@ -5,14 +5,14 @@
   <title>Mia</title><link rel="stylesheet" href="sidepanel.css">
 </head>
 <body>
+  <!-- Decorative only. Three blurred lilac blobs drifting behind the panel.
+       Only transform animates, so Chrome blurs each blob once and then moves a
+       cached texture — this panel can stay open for hours without repainting. -->
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
   <header><div class="brand">
       <span class="mia-logo" id="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 100 100" width="42" height="42">
-          <circle cx="50" cy="50" r="38" class="mia-logo-body" />
-          <ellipse cx="38" cy="48" rx="4.5" ry="6" class="mia-logo-eye" />
-          <ellipse cx="62" cy="48" rx="4.5" ry="6" class="mia-logo-eye" />
-          <path d="M42 60 Q50 64 58 60" class="mia-logo-mouth" />
-        </svg>
+        <img src="icons/mia-icon.png" alt="" width="40" height="40">
         <span class="mia-logo-badge" id="brand-badge" hidden></span>
       </span>
       <div><h1>Mia</h1><p>A little attention. Less repetition.</p></div></div>
@@ -23,13 +23,21 @@
     <p id="mode" class="notice" hidden>Demo mode · sample proposals, local feedback</p>
     <p id="message" role="status" aria-live="polite" hidden></p>
     <section aria-labelledby="suggestion-heading"><div class="section-heading"><h2 id="suggestion-heading">What Mia noticed</h2><button id="refresh" class="quiet">Refresh</button></div><div id="suggestions"><p class="empty">Loading proposals…</p></div></section>
-    <section aria-labelledby="activity-heading"><div class="section-heading"><h2 id="activity-heading">Recent activity</h2><span class="eyebrow">On this device</span></div><ol id="activity" class="activity"></ol><p id="empty-activity" class="empty">Your next browser actions will appear here.</p></section>
-    <section aria-labelledby="privacy-heading"><h2 id="privacy-heading">Your privacy</h2><p class="muted">Mia uses page titles, item names, labels and limited nearby context to understand what your workflow accomplishes. Mia excludes passwords, authentication secrets, raw clipboard contents and full-page data.</p>
-      <h3>Never observe these websites</h3><ul id="domains" class="domains"></ul>
-      <form id="domain-form"><label for="domain">Exclude a website and its subdomains</label><div class="input-row"><input id="domain" placeholder="example.com" autocomplete="off" required><button type="submit">Add</button></div></form>
-      <p class="footnote">Exclusions stop new observations. Previously queued actions may still sync while paused.</p>
+    <section class="activity-section" aria-labelledby="activity-heading"><div class="section-heading"><h2 id="activity-heading">Recent activity</h2><span class="eyebrow">On this device</span></div>
+      <ol id="activity" class="activity"></ol>
+      <p id="empty-activity" class="empty">Your next browser actions will appear here.</p>
+      <div class="activity-foot"><span id="activity-count" class="footnote"></span><a id="view-activity" class="quiet" href="#" target="_blank" rel="noopener">View full activity ↗</a></div>
     </section>
-    <details id="debug" hidden><summary>Development diagnostics</summary><dl id="diagnostics"></dl><button id="flush">Try syncing now</button><p class="footnote">Retries respect backoff. Demo sync acknowledges events locally.</p><details><summary>Recent sanitized events</summary><pre id="events"></pre></details></details>
+    <details class="disclosure" id="privacy-settings">
+      <summary><span class="disclosure-title">Privacy &amp; settings</span><span class="chev" aria-hidden="true"></span></summary>
+      <div class="disclosure-body">
+        <p class="muted">Mia uses page titles, item names, labels and limited nearby context to understand what your workflow accomplishes. Mia excludes passwords, authentication secrets, raw clipboard contents and full-page data.</p>
+        <h3>Never observe these websites</h3><ul id="domains" class="domains"></ul>
+        <form id="domain-form"><label for="domain">Exclude a website and its subdomains</label><div class="input-row"><input id="domain" placeholder="example.com" autocomplete="off" required><button type="submit">Add</button></div></form>
+        <p class="footnote">Exclusions stop new observations. Previously queued actions may still sync while paused.</p>
+        <details class="disclosure" id="debug" hidden><summary><span class="disclosure-title">Development diagnostics</span><span class="chev" aria-hidden="true"></span></summary><dl id="diagnostics"></dl><button id="flush">Try syncing now</button><p class="footnote">Retries respect backoff. Demo sync acknowledges events locally.</p><details class="disclosure"><summary><span class="disclosure-title">Recent sanitized events</span><span class="chev" aria-hidden="true"></span></summary><pre id="events"></pre></details></details>
+      </div>
+    </details>
   </main>
   <footer>Mia proposes. You decide.<br><span>Accepting a proposal never runs it.</span></footer>
   <script type="module" src="sidepanel.js"></script>

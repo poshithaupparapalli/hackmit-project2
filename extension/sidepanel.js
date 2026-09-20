@@ -2,6 +2,8 @@ import { CONFIG } from './config.js';
 const $ = selector => document.querySelector(selector);
 let state, updating = false;
 $('#open-dashboard').href = CONFIG.dashboardUrl;
+// The dashboard has no dedicated activity route, so this opens it normally.
+$('#view-activity').href = CONFIG.dashboardUrl;
 async function send(kind, data = {}) {
   const response = await chrome.runtime.sendMessage({ kind, ...data });
   if (!response?.ok) throw new Error(response?.error || 'Mia is reconnecting. Reload the panel and try again.');
@@ -45,10 +47,15 @@ function renderState(data) {
   $('#pause').textContent = data.settings.paused ? 'Resume' : 'Pause';
   $('#pause').disabled = false;
   $('#mode').hidden = !data.mock;
-  $('#activity').replaceChildren(...data.recent.slice(-12).reverse().map(event => {
-    const row = node('li'); row.append(node('time', time(event.timestamp)), node('span', activityText(event))); return row;
-  }));
+  // Collapsed by default: the newest entry plus a count, with the full log
+  // behind "View full activity", so the panel stays on one screen. The
+  // coordinator caps state.recent at 40, so this counts what is held locally.
+  const newest = data.recent.at(-1);
+  $('#activity').replaceChildren(...(newest ? [(() => {
+    const row = node('li'); row.append(node('time', time(newest.timestamp)), node('span', activityText(newest))); return row;
+  })()] : []));
   $('#empty-activity').hidden = data.recent.length > 0;
+  $('#activity-count').textContent = data.recent.length ? `${data.recent.length} recent event${data.recent.length === 1 ? '' : 's'}` : '';
   $('#domains').replaceChildren(...data.settings.excludedDomains.map(domain => {
     const row = node('li'), remove = node('button', '×'); remove.setAttribute('aria-label', `Stop excluding ${domain}`);
     remove.addEventListener('click', () => action(remove, async () => {
@@ -74,12 +81,18 @@ async function feedback(card, suggestion, decision, userEdits) {
 function renderSuggestion(suggestion) {
   const card = node('article', undefined, 'card');
   card.append(node('div', suggestion.kind === 'rule' ? 'I THINK I LEARNED A RULE' : 'A LITTLE LESS REPETITION', 'eyebrow'), node('h3', suggestion.title), node('p', suggestion.summary));
-  if (Array.isArray(suggestion.evidence)) {
-    const list = node('ul'); list.append(...suggestion.evidence.slice(0, 3).map(text => node('li', text))); card.append(list);
+  // Evidence and steps are collapsed so Yes / No / I have edits stay above the
+  // fold. Nothing is dropped; "See details →" is a link out to the dashboard,
+  // not a toggle, so it could not gate them.
+  const detail = node('details', undefined, 'card-detail');
+  detail.append(node('summary', 'How Mia spotted this'));
+  if (Array.isArray(suggestion.evidence) && suggestion.evidence.length) {
+    const list = node('ul'); list.append(...suggestion.evidence.slice(0, 3).map(text => node('li', text))); detail.append(list);
   }
   if (Array.isArray(suggestion.steps) && suggestion.steps.length) {
-    const list = node('ol'); list.append(...suggestion.steps.map(text => node('li', text))); card.append(list);
+    const list = node('ol'); list.append(...suggestion.steps.map(text => node('li', text))); detail.append(list);
   }
+  if (detail.childElementCount > 1) card.append(detail);
   if (suggestion.kind === 'rule') { card.append(node('p', `When: ${suggestion.trigger || ''}`), node('p', `Rule: ${suggestion.action || ''}`)); }
   if (Number.isFinite(suggestion.confidence)) card.append(node('p', `${Math.round(Math.max(0, Math.min(1, suggestion.confidence)) * 100)}% confidence${Number.isFinite(suggestion.timeSavedPerWeekMinutes) ? ` · about ${suggestion.timeSavedPerWeekMinutes} min / week` : ''}`, 'confidence'));
   const details = node('a', 'See details →', 'quiet card-links');
