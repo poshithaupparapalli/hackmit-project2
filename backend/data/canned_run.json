@@ -1,0 +1,16 @@
+{
+  "_comment": "PLACEHOLDER — Poshitha overwrites this with one real successful gmail_to_sheet run. Shape must match WorkflowRun (contract B4).",
+  "runId": "canned-demo-run",
+  "workflowKey": "gmail_to_sheet",
+  "status": "done",
+  "steps": [
+    { "label": "Reading receipt email", "state": "done" },
+    { "label": "Extracting amount", "state": "done" },
+    { "label": "Opening expense tracker", "state": "done" },
+    { "label": "Appending row", "state": "done" }
+  ],
+  "result": {
+    "rowsAppended": 1,
+    "sheetUrl": "https://docs.google.com/spreadsheets/d/DEMO_SHEET_ID/edit"
+  }
+}
