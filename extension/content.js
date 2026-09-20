@@ -17,15 +17,29 @@
   function send(type, detail, target) {
     if (!active() || S.isPassword(target) || S.isPassword(document.activeElement)) return;
     const observation = P.sanitizeObservation({ type, detail, context: S.extractSemanticContext(target) });
-    if (observation) chrome.runtime.sendMessage({ kind: 'observe', observation }).catch(() => { settings = null; });
+    if (!observation) return;
+    // chrome.runtime throws synchronously (not just a rejected promise) once
+    // the extension has been reloaded/updated out from under an already-open
+    // tab's content script ("Extension context invalidated"). Fail closed —
+    // the tab picks back up cleanly on its next reload — instead of an
+    // uncaught error on every subsequent click/edit/scroll in this tab.
+    try {
+      chrome.runtime.sendMessage({ kind: 'observe', observation }).catch(() => { settings = null; });
+    } catch {
+      settings = null;
+    }
   }
-  chrome.runtime.onMessage.addListener(message => {
-    if (message.kind === 'settings') applySettings(message);
-    if (message.kind === 'navigation') { scrollMilestones = new Set(); }
-  });
-  chrome.runtime.sendMessage({ kind: 'settings:get' }).then(response => {
-    if (response?.ok) applySettings(response.data);
-  }).catch(() => {});
+  try {
+    chrome.runtime.onMessage.addListener(message => {
+      if (message.kind === 'settings') applySettings(message);
+      if (message.kind === 'navigation') { scrollMilestones = new Set(); }
+    });
+    chrome.runtime.sendMessage({ kind: 'settings:get' }).then(response => {
+      if (response?.ok) applySettings(response.data);
+    }).catch(() => {});
+  } catch {
+    // Context was already invalidated before this script finished setting up.
+  }
 
   document.addEventListener('click', event => {
     if (!active() || !event.isTrusted || S.isPassword(event.target)) return;

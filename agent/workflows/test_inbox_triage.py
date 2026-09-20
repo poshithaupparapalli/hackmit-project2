@@ -115,7 +115,8 @@ class InboxTriageTests(unittest.TestCase):
         self.assertEqual(run.result["messagesSent"], 0)
         self.assertIsNone(run.error)
         self.assertEqual(set(run.model_dump()),
-                         {"runId", "workflowKey", "status", "steps", "result", "error", "approvalRequest"})
+                         {"runId", "workflowKey", "status", "steps", "result", "error", "approvalRequest",
+                          "suggestionId", "startedAt", "triggeredBy"})
         empty = self.run_workflow([])
         self.assertEqual(empty.status, "done")
         self.assertEqual(empty.result["draftsSuggested"], 0)

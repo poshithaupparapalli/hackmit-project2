@@ -19,6 +19,7 @@ backend/data/mia.db
 *.db
 *.db-shm
 *.db-wal
+backend/data/backups/
 
 # Node / frontend
 node_modules
