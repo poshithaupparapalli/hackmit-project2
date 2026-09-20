@@ -9,6 +9,13 @@ and mirror MIA_CONTRACTS.md exactly:
     GET  /v1/workflows/runs?limit=50                             -> [WorkflowRun] (history)
     POST /v1/workflows/runs/{runId}/approve  ?decision=approve|cancel -> WorkflowRun
 
+Plus the "ask every time" half of auto-run (pending.py) — a suggestion whose
+runMode is "ask" doesn't run on new input, it raises a prompt instead:
+
+    GET  /v1/workflows/pending                        -> [PendingTrigger]
+    POST /v1/workflows/pending/{pendingId}/approve     -> { runId }
+    POST /v1/workflows/pending/{pendingId}/dismiss     -> { ok: true }
+
 Plus the Google OAuth web flow the dashboard's "Integrations" panel drives —
 the browser-based counterpart to `python -m agent.oauth_flow`'s CLI flow:
 
@@ -43,7 +50,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 
-from . import autorun, config, oauth_flow, runner
+from . import autorun, config, oauth_flow, pending, runner
+from .pending import PendingTrigger
 from .runner import WorkflowRun
 
 # Where the dashboard lives — the OAuth callback redirects back here.
@@ -111,6 +119,28 @@ def approve_run(run_id: str, decision: str = "approve") -> WorkflowRun:
     if run is None:
         raise HTTPException(status_code=404, detail="run not found")
     return run
+
+
+@app.get("/v1/workflows/pending", response_model=list[PendingTrigger])
+def list_pending() -> list[PendingTrigger]:
+    return pending.list_pending()
+
+
+@app.post("/v1/workflows/pending/{pending_id}/approve", response_model=RunAccepted)
+def approve_pending(pending_id: str) -> RunAccepted:
+    trigger = pending.resolve(pending_id)
+    if trigger is None:
+        raise HTTPException(status_code=404, detail="pending trigger not found")
+    run_id = runner.start_run(trigger.workflowKey, trigger.suggestionId, triggered_by="auto")
+    return RunAccepted(runId=run_id)
+
+
+@app.post("/v1/workflows/pending/{pending_id}/dismiss")
+def dismiss_pending(pending_id: str) -> dict:
+    trigger = pending.resolve(pending_id)
+    if trigger is None:
+        raise HTTPException(status_code=404, detail="pending trigger not found")
+    return {"ok": True}
 
 
 @app.get("/v1/auth/google/status")

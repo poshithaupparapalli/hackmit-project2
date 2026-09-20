@@ -19,7 +19,8 @@ def _row_to_suggestion(r) -> Suggestion:
         buildPrompt=r["build_prompt"] or "", workflowKey=r["workflow_key"],
         confidence=r["confidence"] or 0.0,
         timeSavedPerWeekMinutes=r["time_saved_per_week_minutes"] or 0.0,
-        status=r["status"], createdAt=r["created_at"], updatedAt=r["updated_at"],
+        status=r["status"], runMode=r["run_mode"] or "ask",
+        createdAt=r["created_at"], updatedAt=r["updated_at"],
     )
 
 
@@ -39,10 +40,20 @@ def patch_suggestion(suggestion_id: str, body: SuggestionPatchRequest) -> Sugges
     ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="suggestion not found")
-    conn.execute(
-        "UPDATE suggestions SET status = ?, updated_at = ? WHERE id = ?",
-        (body.status, now_ms(), suggestion_id),
-    )
+    if body.status is None and body.runMode is None:
+        raise HTTPException(status_code=400, detail="provide status and/or runMode")
+    updates: list[str] = []
+    params: list = []
+    if body.status is not None:
+        updates.append("status = ?")
+        params.append(body.status)
+    if body.runMode is not None:
+        updates.append("run_mode = ?")
+        params.append(body.runMode)
+    updates.append("updated_at = ?")
+    params.append(now_ms())
+    params.append(suggestion_id)
+    conn.execute(f"UPDATE suggestions SET {', '.join(updates)} WHERE id = ?", params)
     conn.commit()
     row = conn.execute(
         "SELECT * FROM suggestions WHERE id = ?", (suggestion_id,)

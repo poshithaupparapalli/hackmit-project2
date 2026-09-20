@@ -1,8 +1,13 @@
-"""Auto-run: execute an ACCEPTED workflow automatically when new matching
-input appears, instead of waiting for a manual Run click.
+"""Auto-run: act on an ACCEPTED workflow automatically when new matching
+input appears, instead of waiting for a manual Run click — exactly how far
+"automatically" goes is each suggestion's own runMode choice:
+  - runMode="auto": start the run immediately, no further click.
+  - runMode="ask" (the default): don't run — raise a pending.PendingTrigger
+    instead, which the dashboard shows as a "found new input, run it now?"
+    prompt. Approving it starts the exact same run a manual click would.
 
-Scope, deliberately narrow — this only decides WHEN to call the existing
-runner.start_run() for a workflow that:
+Scope, deliberately narrow either way — this only decides WHEN to call the
+existing runner.start_run() for a workflow that:
   1. a person has already explicitly accepted (status="accepted" on Kathy's
      backend), and
   2. declares a TRIGGER_QUERIES entry (see runner.py) — a workflow with no
@@ -11,7 +16,8 @@ Nothing here invents a new kind of action or bypasses the B5 approval
 checkpoint inside a run: gmail_to_sheet and email_to_calendar run exactly
 the same code path either way, so a consequential step (e.g. sending
 calendar invites) still pauses for a person's decision regardless of
-whether the run started from a click or from here.
+whether the run started from a click, an auto-run tick, or an approved
+pending trigger.
 
 "New input" = a Gmail message the workflow's query matches that we have not
 already started a run for, tracked by a small on-disk watermark
@@ -31,7 +37,7 @@ import logging
 
 import httpx
 
-from . import config, runner
+from . import config, pending, runner
 from .tools import _service
 
 logger = logging.getLogger("mia.autorun")
@@ -60,8 +66,9 @@ def _latest_message_id(query: str) -> str | None:
     return messages[0]["id"] if messages else None
 
 
-async def _accepted_workflow_keys() -> dict[str, str]:
-    """workflowKey -> one accepted suggestionId with that key (for correlation).
+async def _accepted_workflows() -> dict[str, dict]:
+    """workflowKey -> {suggestionId, title, runMode} for one accepted
+    suggestion with that key (for correlation + the pending-trigger prompt).
 
     Read-only call to Kathy's public API — never Kathy's DB directly (B7).
     """
@@ -73,27 +80,33 @@ async def _accepted_workflow_keys() -> dict[str, str]:
     except Exception as exc:  # backend down/unreachable this tick — try again next time
         logger.debug("auto-run: backend unreachable (%s)", exc)
         return {}
-    out: dict[str, str] = {}
+    out: dict[str, dict] = {}
     for s in suggestions:
         key = s.get("workflowKey")
         if key and s.get("status") == "accepted" and key not in out:
-            out[key] = s["id"]
+            out[key] = {
+                "suggestionId": s["id"],
+                "title": s.get("title") or key,
+                "runMode": s.get("runMode") or "ask",
+            }
     return out
 
 
 async def _tick() -> None:
-    accepted = await _accepted_workflow_keys()
+    accepted = await _accepted_workflows()
     if not accepted:
         return
     watermarks = _load_watermarks()
     loop = asyncio.get_event_loop()
     changed = False
-    for workflow_key, suggestion_id in accepted.items():
+    for workflow_key, info in accepted.items():
         get_query = runner.TRIGGER_QUERIES.get(workflow_key)
         if not get_query or not runner.is_known_workflow(workflow_key):
             continue  # accepted but not auto-runnable (e.g. no trigger query registered)
         if runner.is_run_active(workflow_key):
-            continue  # already mid-run (manual or a previous auto tick) — don't overlap
+            continue  # already mid-run (manual, a previous auto tick, or an approved pending trigger)
+        if pending.has_pending_for(workflow_key):
+            continue  # already asked and waiting on a person's answer
         try:
             query = get_query()
             latest_id = await loop.run_in_executor(None, _latest_message_id, query)
@@ -104,8 +117,17 @@ async def _tick() -> None:
             continue  # nothing new
         watermarks[workflow_key] = latest_id
         changed = True
-        logger.info("auto-run: new input for %s (message %s) — starting run", workflow_key, latest_id)
-        runner.start_run(workflow_key, suggestion_id, triggered_by="auto")
+        suggestion_id, title = info["suggestionId"], info["title"]
+        if info["runMode"] == "auto":
+            logger.info("auto-run: new input for %s (message %s) — starting run", workflow_key, latest_id)
+            runner.start_run(workflow_key, suggestion_id, triggered_by="auto")
+        else:
+            logger.info("auto-run: new input for %s (message %s) — asking before running", workflow_key, latest_id)
+            pending.create(
+                workflow_key, suggestion_id,
+                title=f'Run "{title}"?',
+                description="Mia found new matching input for this automation. Run it now?",
+            )
     if changed:
         _save_watermarks(watermarks)
 

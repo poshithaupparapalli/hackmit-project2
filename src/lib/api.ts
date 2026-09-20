@@ -10,6 +10,10 @@ export const AGENT_URL = (import.meta.env.VITE_MIA_AGENT_URL as string | undefin
 
 export type SuggestionKind = 'workflow' | 'automation' | 'rule';
 export type SuggestionStatus = 'proposed' | 'accepted' | 'dismissed' | 'built';
+// How an accepted, runnable suggestion behaves once auto-run finds new
+// matching input: "auto" runs with no further click; "ask" (the default)
+// raises a PendingTrigger prompt instead of running. See agent/pending.py.
+export type RunMode = 'auto' | 'ask';
 
 export interface Suggestion {
   id: string;
@@ -25,6 +29,7 @@ export interface Suggestion {
   confidence: number;
   timeSavedPerWeekMinutes: number;
   status: SuggestionStatus;
+  runMode: RunMode;
   createdAt: number;
   updatedAt: number;
 }
@@ -71,6 +76,15 @@ export interface ChatResponse {
   messages: ChatMessage[];
 }
 
+export interface PendingTrigger {
+  id: string;
+  workflowKey: string;
+  suggestionId: string;
+  title: string;
+  description: string;
+  createdAt: number;
+}
+
 async function asJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const detail = await res.text().catch(() => '');
@@ -97,6 +111,13 @@ export const backend = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
+    }).then((r) => asJson<Suggestion>(r));
+  },
+  setRunMode(id: string, runMode: RunMode): Promise<Suggestion> {
+    return fetch(`${BACKEND_URL}/v1/suggestions/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ runMode }),
     }).then((r) => asJson<Suggestion>(r));
   },
   feedback(id: string, decision: 'accept' | 'dismiss' | 'edit', userEdits?: string): Promise<{ ok: boolean }> {
@@ -143,6 +164,19 @@ export const agent = {
     return fetch(`${AGENT_URL}/v1/workflows/runs/${encodeURIComponent(runId)}/approve?decision=${decision}`, {
       method: 'POST',
     }).then((r) => asJson<WorkflowRun>(r));
+  },
+  listPending(): Promise<PendingTrigger[]> {
+    return fetch(`${AGENT_URL}/v1/workflows/pending`).then((r) => asJson<PendingTrigger[]>(r));
+  },
+  approvePending(pendingId: string): Promise<{ runId: string }> {
+    return fetch(`${AGENT_URL}/v1/workflows/pending/${encodeURIComponent(pendingId)}/approve`, {
+      method: 'POST',
+    }).then((r) => asJson<{ runId: string }>(r));
+  },
+  dismissPending(pendingId: string): Promise<{ ok: boolean }> {
+    return fetch(`${AGENT_URL}/v1/workflows/pending/${encodeURIComponent(pendingId)}/dismiss`, {
+      method: 'POST',
+    }).then((r) => asJson<{ ok: boolean }>(r));
   },
 };
 

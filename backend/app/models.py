@@ -67,6 +67,13 @@ class InstallResponse(BaseModel):
 WorkflowKey = Literal["gmail_to_sheet", "email_to_calendar"]
 SuggestionKind = Literal["workflow", "automation", "rule"]
 SuggestionStatus = Literal["proposed", "accepted", "dismissed", "built"]
+# How an accepted, runnable suggestion behaves once auto-run finds new
+# matching input: "auto" runs it with no further click; "ask" raises a
+# PendingTrigger instead (agent/pending.py) so a person decides each time.
+# Defaults to "ask" — the more cautious of the two, matching the product's
+# baseline "never act without a person deciding" stance; "auto" is an
+# explicit opt-in from the Active Automations panel.
+RunMode = Literal["auto", "ask"]
 
 
 class Suggestion(BaseModel):
@@ -83,12 +90,14 @@ class Suggestion(BaseModel):
     confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     timeSavedPerWeekMinutes: float = 0.0
     status: SuggestionStatus = "proposed"
+    runMode: RunMode = "ask"
     createdAt: int
     updatedAt: int
 
 
 class SuggestionPatchRequest(BaseModel):
-    status: SuggestionStatus
+    status: Optional[SuggestionStatus] = None
+    runMode: Optional[RunMode] = None
 
 
 class SuggestionFeedbackRequest(BaseModel):
