@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Mia",
+  "version": "0.1.0",
+  "minimum_chrome_version": "120",
+  "description": "Notice repetitive workflows. You decide what happens next.",
+  "incognito": "not_allowed",
+  "permissions": ["storage", "sidePanel", "alarms", "webNavigation"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": { "service_worker": "service-worker.js", "type": "module" },
+  "action": { "default_title": "Open Mia" },
+  "side_panel": { "default_path": "sidepanel.html" },
+  "content_scripts": [{
+    "matches": ["http://*/*", "https://*/*"],
+    "js": ["lib/privacy.js", "lib/semantics.js", "content.js"],
+    "all_frames": true,
+    "run_at": "document_start"
+  }],
+  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'" }
+}

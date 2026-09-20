@@ -12,9 +12,16 @@ DetailValue = Union[str, int, float, bool, None]
 
 
 class EventContext(BaseModel):
-    sectionLabel: Optional[str] = Field(default=None, max_length=80)
-    formLabel: Optional[str] = Field(default=None, max_length=80)
-    targetLabel: Optional[str] = Field(default=None, max_length=80)
+    # Optional v1 context extension. Existing three fields remain unchanged;
+    # these bounded fields make task identity available without storing bodies,
+    # cell contents, or arbitrary DOM text.
+    pageTitle: Optional[str] = Field(default=None, max_length=200)
+    itemTitle: Optional[str] = Field(default=None, max_length=200)
+    sectionLabel: Optional[str] = Field(default=None, max_length=120)
+    formLabel: Optional[str] = Field(default=None, max_length=120)
+    targetLabel: Optional[str] = Field(default=None, max_length=120)
+    nearbyText: Optional[str] = Field(default=None, max_length=200)
+    semanticType: Optional[str] = Field(default=None, max_length=32)
 
 
 class MiaEvent(BaseModel):

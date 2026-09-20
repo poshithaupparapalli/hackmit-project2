@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mia</title><link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header><div class="brand"><span class="mark" aria-hidden="true">m</span><div><h1>Mia</h1><p>A little attention. Less repetition.</p></div></div>
+    <div class="observation"><span id="observation-status" role="status">Connecting…</span><button id="pause" disabled>Pause</button></div>
+  </header>
+  <main>
+    <p id="mode" class="notice" hidden>Demo mode · sample proposals, local feedback</p>
+    <p id="message" role="status" aria-live="polite" hidden></p>
+    <section aria-labelledby="suggestion-heading"><div class="section-heading"><h2 id="suggestion-heading">What Mia noticed</h2><button id="refresh" class="quiet">Refresh</button></div><div id="suggestions"><p class="empty">Loading proposals…</p></div></section>
+    <section aria-labelledby="activity-heading"><div class="section-heading"><h2 id="activity-heading">Recent activity</h2><span class="eyebrow">On this device</span></div><ol id="activity" class="activity"></ol><p id="empty-activity" class="empty">Your next browser actions will appear here.</p></section>
+    <section aria-labelledby="privacy-heading"><h2 id="privacy-heading">Your privacy</h2><p class="muted">Mia uses page titles, item names, labels and limited nearby context to understand what your workflow accomplishes. Mia excludes passwords, authentication secrets, raw clipboard contents and full-page data.</p>
+      <h3>Never observe these websites</h3><ul id="domains" class="domains"></ul>
+      <form id="domain-form"><label for="domain">Exclude a website and its subdomains</label><div class="input-row"><input id="domain" placeholder="example.com" autocomplete="off" required><button type="submit">Add</button></div></form>
+      <p class="footnote">Exclusions stop new observations. Previously queued actions may still sync while paused.</p>
+    </section>
+    <details id="debug" hidden><summary>Development diagnostics</summary><dl id="diagnostics"></dl><button id="flush">Try syncing now</button><p class="footnote">Retries respect backoff. Demo sync acknowledges events locally.</p><details><summary>Recent sanitized events</summary><pre id="events"></pre></details></details>
+  </main>
+  <footer>Mia proposes. You decide.<br><span>Accepting a proposal never runs it.</span></footer>
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

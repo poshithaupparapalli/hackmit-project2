@@ -94,6 +94,7 @@ def test_receipt_suggestion(client, auth):
     assert len(created) >= 1
     sug = created[0]
     assert sug["workflowKey"] == "gmail_to_sheet"
+    assert "Expense Tracker" in sug["title"]
     assert 1 <= len(sug["evidence"]) <= 3
     assert sug["kind"] == "workflow" and sug["steps"]
 
@@ -147,3 +148,54 @@ def test_analyze_and_status_endpoints(client, auth):
     assert set(r.json()) == {
         "observerOnline", "paused", "lastEventAt", "lastAnalysisAt", "newEventsPending"
     }
+
+
+def test_llm_shape_drift_does_not_crash_analysis(client, auth, monkeypatch):
+    """A model returning strings for array fields is still safely handled."""
+    _seed_receipt_events(client, *auth)
+    from app import analyst
+    from app.db import get_conn
+
+    raw = [{
+        "kind": "workflow",
+        "title": "Copy receipts into a sheet",
+        "summary": "Repeated Gmail to Sheets activity.",
+        "evidence": "Copied from Gmail and pasted into Sheets.",
+        "steps": "Open Gmail, then open Sheets.",
+        "confidence": "0.8",
+        "timeSavedPerWeekMinutes": "10",
+    }]
+    created = analyst._save_suggestions(get_conn(), raw, {})
+    assert created and created[0]["workflowKey"] == "gmail_to_sheet"
+    assert created[0]["evidence"] == ["Copied from Gmail and pasted into Sheets."]
+
+
+def test_rich_context_round_trips_into_digest_and_trace(client, auth):
+    headers, install_id = auth
+    from app.db import now_ms
+    event = _ev(
+        1, now_ms(), etype="copy", host="mail.google.com", path="/mail/u/0/",
+        title="Gmail", detail={"length": 5}, context={
+            "pageTitle": "Gmail", "itemTitle": "Receipt from Uber",
+            "sectionLabel": "September", "targetLabel": "Total",
+            "nearbyText": "Receipt from Uber — Sep 19", "semanticType": "currency",
+        },
+    )
+    event2 = {**event, "id": str(uuid.uuid4()), "sequence": 2, "timestamp": event["timestamp"] + 1}
+    response = client.post("/v1/events/batch", json=_batch(install_id, [event, event2]), headers=headers)
+    assert response.status_code == 200 and response.json()["accepted"] == [event["id"], event2["id"]]
+    from app.db import get_conn
+    from app.miner import compact_trace, compute_digest, fetch_events, mine_semantic
+    row = get_conn().execute("SELECT context_json FROM events WHERE id = ?", (event["id"],)).fetchone()
+    stored = json.loads(row["context_json"])
+    assert stored["itemTitle"] == "Receipt from Uber"
+    digest = compute_digest(get_conn())
+    assert any(
+        hint["itemTitle"] == "Receipt from Uber"
+        and hint["nearbyText"] == "Receipt from Uber — Sep 19"
+        for hint in digest["contextHints"]
+    )
+    semantic = mine_semantic(fetch_events(get_conn()))
+    assert any(item["itemTitle"] == "receipt from uber" and item["semanticType"] == "currency" for item in semantic)
+    trace = compact_trace(fetch_events(get_conn()))
+    assert any('copied currency value labeled "Total" from "Receipt from Uber"' in line for line in trace)

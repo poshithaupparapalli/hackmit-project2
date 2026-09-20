@@ -94,9 +94,15 @@ interface MiaEvent {
   // Small semantic hints about WHAT the user is interacting with.
   // Never use this for arbitrary page text.
   context?: {
+    // Optional bounded task identity. These fields extend context without
+    // changing schemaVersion; they contain labels/titles, never page bodies.
+    pageTitle?: string;
+    itemTitle?: string;
     sectionLabel?: string;
     formLabel?: string;
     targetLabel?: string;
+    nearbyText?: string;
+    semanticType?: string;
   };
 }
 ```
@@ -226,10 +232,19 @@ Mia must NOT know that the total was **$42.18**.
 ### Context limits
 
 ```text
-sectionLabel <= 80 chars
-formLabel    <= 80 chars
-targetLabel  <= 80 chars
+pageTitle    <= 200 chars
+itemTitle    <= 200 chars
+sectionLabel <= 120 chars
+formLabel    <= 120 chars
+targetLabel  <= 120 chars
+nearbyText   <= 200 chars
+semanticType <= 32 chars
 ```
+
+These optional context fields are a backward-compatible v1 extension requested
+for task-semantic understanding. They may contain bounded visible titles and
+labels, but never raw form values, email bodies, spreadsheet cell contents,
+clipboard contents, full-page text, tokens, or screenshots.
 
 Semantic context should come from things such as:
 

@@ -86,6 +86,13 @@ _SYSTEM = (
     "You are Mia's workflow analyst. You receive a PatternDigest of a user's "
     "sanitized browser activity plus mined repeated action sequences. Propose "
     "0-4 automation/workflow/rule suggestions grounded ONLY in the evidence. "
+    "Page titles, item titles, section names, labels, nearby snippets, and "
+    "semantic value categories are intentional evidence: use them to infer the "
+    "purpose of the task. Name the workflow by the user's apparent goal, not "
+    "only by the applications or mechanical actions. Prefer 'Log receipt "
+    "totals from receipt emails into Fall 2026 Expenses' over 'Move data from "
+    "Gmail to Sheets' when the bounded evidence supports it. Distinguish "
+    "evidence from inference and never invent names, amounts, or details. "
     "Each suggestion must cite 1-3 concrete observations (real counts, hosts, "
     "sequences). Return JSON: {\"suggestions\":[{kind,title,summary,evidence,"
     "steps,trigger,action,buildPrompt,confidence,timeSavedPerWeekMinutes}]}. "
@@ -130,6 +137,26 @@ def _is_sheet(host: str) -> bool:
     return any(s in (host or "") for s in SHEET_HOSTS)
 
 
+def _specific_sheet_name(digest) -> str:
+    """Choose a bounded observed sheet title for the offline suggestion."""
+    generic = {"google sheets", "sheets", "spreadsheet"}
+    for hint in digest.get("contextHints", []):
+        if not _is_sheet(hint.get("host", "")):
+            continue
+        for key in ("pageTitle", "itemTitle"):
+            value = str(hint.get(key) or "").strip()
+            if value and value.lower() not in generic:
+                return value
+    for host in digest.get("hosts", []):
+        if not _is_sheet(host.get("host", "")):
+            continue
+        for value in host.get("topTitles", []):
+            value = str(value or "").strip()
+            if value and value.lower() not in generic:
+                return value
+    return ""
+
+
 def _heuristic_suggestions(digest, motifs, semantic) -> list[dict]:
     """Build the receipt-loop suggestion from mined evidence, no LLM needed."""
     cp = next(
@@ -150,14 +177,23 @@ def _heuristic_suggestions(digest, motifs, semantic) -> list[dict]:
         evidence.append(f"Copied from {cp['from']} and pasted into {cp['to']} {cp['count']} times")
     if trans:
         evidence.append(f"Repeated sequence {' -> '.join(trans['path'])} seen {trans['count']} times")
-    semantic_hit = next((s for s in semantic if "receipt" in (s["area"] + s["target"])), None)
+    semantic_hit = next((s for s in semantic if "receipt" in " ".join(str(s.get(key, "")) for key in ("pageTitle", "itemTitle", "area", "target", "nearbyText"))), None)
     if semantic_hit:
-        evidence.append(f"Interacted with '{semantic_hit['area'] or semantic_hit['target']}' {semantic_hit['count']} times across {semantic_hit['days']} days")
+        identity = semantic_hit.get("itemTitle") or semantic_hit.get("area") or semantic_hit.get("target")
+        target = semantic_hit.get("target")
+        value_type = semantic_hit.get("semanticType")
+        if target and value_type:
+            evidence.append(f"Handled {value_type} values labeled '{target}' in '{identity}' {semantic_hit['count']} times")
+        else:
+            evidence.append(f"Interacted with '{identity}' {semantic_hit['count']} times across {semantic_hit['days']} days")
     evidence = evidence[:3] or [f"Repeated gmail-to-sheet activity {count} times"]
+    sheet_name = _specific_sheet_name(digest)
+    destination = f'"{sheet_name}"' if sheet_name else "your expense sheet"
+    title = f"Log receipt totals into {sheet_name}" if sheet_name else "Log receipt emails to your expense sheet"
     return [{
         "kind": "workflow",
-        "title": "Log receipt emails to your expense sheet",
-        "summary": "Mia noticed you repeatedly copy receipt totals from Gmail into a Google Sheet. She can do this for you when you choose to run it.",
+        "title": title,
+        "summary": f"Mia noticed you repeatedly copy receipt totals from Gmail into {destination}. She can do this for you when you choose to run it.",
         "evidence": evidence,
         "steps": [
             "Open the receipt email in Gmail",
@@ -166,8 +202,8 @@ def _heuristic_suggestions(digest, motifs, semantic) -> list[dict]:
             "Append the total as a new row",
         ],
         "trigger": "",
-        "action": "Read the latest receipt email, extract the total, and append a row to the expense sheet.",
-        "buildPrompt": "Read receipt emails via Gmail API, extract the amount, append a row via Sheets API.",
+        "action": f"Read the latest receipt email, extract the total, and append a row to {destination}.",
+        "buildPrompt": f"Read receipt emails via Gmail API, extract the amount, append a row via Sheets API to {destination}.",
         "confidence": min(0.5 + 0.1 * count, 0.95),
         "timeSavedPerWeekMinutes": 5 * count,
     }]
@@ -175,12 +211,27 @@ def _heuristic_suggestions(digest, motifs, semantic) -> list[dict]:
 
 # ---------- workflowKey mapping (A12) ----------
 
+def _string_list(value) -> list[str]:
+    """Normalize permissive model JSON before applying the frozen schema.
+
+    Models occasionally emit one string where the prompt asked for an array.
+    Treat that as one item instead of allowing an analysis task to crash the
+    backend worker. Non-string values are converted only after truncation at
+    the schema boundary below.
+    """
+    if isinstance(value, list):
+        return [str(item) for item in value if item is not None]
+    if isinstance(value, str) and value.strip():
+        return [value]
+    return []
+
+
 def _determine_workflow_key(s: dict, digest) -> str | None:
     """Backend decides the key (A12) — LLM output is only a hint. A suggestion
     maps to a workflow when its text matches that workflow's keyword profile."""
     text = " ".join(
-        [s.get("title", ""), s.get("summary", ""), s.get("action", "")]
-        + s.get("steps", []) + s.get("evidence", [])
+        [str(s.get("title", "")), str(s.get("summary", "")), str(s.get("action", ""))]
+        + _string_list(s.get("steps")) + _string_list(s.get("evidence"))
     ).lower()
     for key, spec in WORKFLOW_REGISTRY.items():
         if any(k in text for k in spec["keywords_any"]) and any(
@@ -220,23 +271,28 @@ def _save_suggestions(conn: sqlite3.Connection, raw: list[dict], digest) -> list
         if key in existing:
             continue  # covers proposed/accepted/built AND dismissed re-proposals
         now = now_ms()
-        candidate = {
-            "id": str(uuid.uuid4()),
-            "kind": s.get("kind") if s.get("kind") in ("workflow", "automation", "rule") else "workflow",
-            "title": title,
-            "summary": str(s.get("summary", ""))[:500],
-            "evidence": [str(e)[:200] for e in (s.get("evidence") or [])[:3]],
-            "steps": [str(x)[:200] for x in (s.get("steps") or [])[:8]],
-            "trigger": str(s.get("trigger", ""))[:200],
-            "action": str(s.get("action", ""))[:300],
-            "buildPrompt": str(s.get("buildPrompt", ""))[:500],
-            "workflowKey": _determine_workflow_key(s, digest),
-            "confidence": max(0.0, min(1.0, float(s.get("confidence") or 0.0))),
-            "timeSavedPerWeekMinutes": float(s.get("timeSavedPerWeekMinutes") or 0.0),
-            "status": "proposed",
-            "createdAt": now,
-            "updatedAt": now,
-        }
+        try:
+            candidate = {
+                "id": str(uuid.uuid4()),
+                "kind": s.get("kind") if s.get("kind") in ("workflow", "automation", "rule") else "workflow",
+                "title": title,
+                "summary": str(s.get("summary", ""))[:500],
+                "evidence": [item[:200] for item in _string_list(s.get("evidence"))[:3]],
+                "steps": [item[:200] for item in _string_list(s.get("steps"))[:8]],
+                "trigger": str(s.get("trigger", ""))[:200],
+                "action": str(s.get("action", ""))[:300],
+                "buildPrompt": str(s.get("buildPrompt", ""))[:500],
+                "workflowKey": _determine_workflow_key(s, digest),
+                "confidence": max(0.0, min(1.0, float(s.get("confidence") or 0.0))),
+                "timeSavedPerWeekMinutes": float(s.get("timeSavedPerWeekMinutes") or 0.0),
+                "status": "proposed",
+                "createdAt": now,
+                "updatedAt": now,
+            }
+        except (TypeError, ValueError):
+            # One malformed candidate must not discard valid suggestions or
+            # terminate the periodic analysis loop.
+            continue
         try:
             sug = Suggestion.model_validate(candidate)
         except ValidationError:

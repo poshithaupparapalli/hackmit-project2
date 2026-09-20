@@ -1,0 +1,7 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Expense tracker</title><style>body{font:18px system-ui;max-width:650px;margin:60px auto;line-height:1.6;background:#f7f8f4;color:#263a35}form{padding:24px;background:white;border:1px solid #ddd;border-radius:12px}label{display:block;margin-top:20px}button,input,textarea{font:inherit;padding:8px}button{margin-top:20px}</style></head><body>
+<h1>Expense tracker</h1><form aria-label="Add expense" onsubmit="event.preventDefault();document.querySelector('#saved').textContent='Row added (fixture only)'">
+<label for="total">Total</label><input id="total" name="total" autocomplete="off">
+<label for="note">Receipt details</label><textarea id="note" name="receipt"></textarea>
+<label id="row-label">Expense row</label><div id="row" role="textbox" contenteditable="true" aria-labelledby="row-label" style="border:1px solid #ddd;min-height:40px"></div>
+<button type="submit">Add row</button></form><p id="saved" role="status"></p><p>Paste the total, enter a note, then add a row. Mia should retain labels and counts, never the values.</p>
+</body></html>

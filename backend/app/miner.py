@@ -35,10 +35,30 @@ def _norm_label(value) -> str:
     return _DIGIT_RUN.sub("#", s)[:60]
 
 
+def _event_context(ev: sqlite3.Row) -> dict:
+    try:
+        value = json.loads(ev["context_json"]) if ev["context_json"] else {}
+        return value if isinstance(value, dict) else {}
+    except (TypeError, json.JSONDecodeError):
+        return {}
+
+
+def _friendly_host(host: str) -> str:
+    return {
+        "mail.google.com": "Gmail",
+        "docs.google.com": "Google Sheets",
+        "calendar.google.com": "Google Calendar",
+    }.get(host, host)
+
+
+def _quoted(value: str) -> str:
+    return f'"{value}"' if value else ""
+
+
 def event_signature(ev: sqlite3.Row) -> str:
     """Canonical `{type}:{host}:{label}` signature for motif mining."""
     detail = json.loads(ev["detail_json"]) if ev["detail_json"] else {}
-    ctx = json.loads(ev["context_json"]) if ev["context_json"] else {}
+    ctx = _event_context(ev)
     label = ""
     t = ev["type"]
     if t == "click":
@@ -54,7 +74,7 @@ def event_signature(ev: sqlite3.Row) -> str:
     elif t == "scroll":
         label = str(detail.get("depth") or "")
     if not label:
-        label = ctx.get("targetLabel") or ctx.get("sectionLabel") or ""
+        label = ctx.get("targetLabel") or ctx.get("itemTitle") or ctx.get("sectionLabel") or ctx.get("pageTitle") or ""
     return f"{t}:{ev['host']}:{_norm_label(label)}"
 
 
@@ -194,6 +214,30 @@ def compute_digest(conn: sqlite3.Connection, window_days: int = 7) -> dict:
         for s in sessions
     ]
 
+    # Keep a small deterministic semantic digest alongside the frozen A11
+    # structural fields. Repeated labels/titles are more useful to the analyst
+    # than a raw event dump, and the list is capped to keep prompts bounded.
+    hint_counts: Counter = Counter()
+    for ev in events:
+        ctx = _event_context(ev)
+        identity = tuple(ctx.get(key, "") for key in ("pageTitle", "itemTitle", "sectionLabel", "formLabel", "targetLabel", "nearbyText", "semanticType"))
+        if any(identity):
+            hint_counts[(ev["host"], identity)] += 1
+    context_hints = [
+        {
+            "host": host,
+            "pageTitle": values[0] or None,
+            "itemTitle": values[1] or None,
+            "sectionLabel": values[2] or None,
+            "formLabel": values[3] or None,
+            "targetLabel": values[4] or None,
+            "nearbyText": values[5] or None,
+            "semanticType": values[6] or None,
+            "count": count,
+        }
+        for (host, values), count in hint_counts.most_common(40)
+    ]
+
     return {
         "computedAt": now_ms,
         "eventCount": len(events),
@@ -204,6 +248,7 @@ def compute_digest(conn: sqlite3.Connection, window_days: int = 7) -> dict:
         "repeatedFields": repeated_fields,
         "copyPaste": copy_paste,
         "sessions": session_dicts,
+        "contextHints": context_hints,
     }
 
 
@@ -252,33 +297,69 @@ def _is_subsequence(needle: list[str], hay: list[str]) -> bool:
 
 
 def mine_semantic(events: list[sqlite3.Row]) -> list[dict]:
-    """Task-level patterns via context labels: (host, form/section, target)."""
+    """Task-level patterns via bounded titles, labels and value categories."""
     counts: Counter = Counter()
     days: dict[tuple, set] = defaultdict(set)
     for ev in events:
-        if not ev["context_json"]:
+        ctx = _event_context(ev)
+        area = ctx.get("formLabel") or ctx.get("sectionLabel") or ""
+        target = ctx.get("targetLabel") or ""
+        item = ctx.get("itemTitle") or ""
+        page = ctx.get("pageTitle") or ""
+        nearby = ctx.get("nearbyText") or ""
+        semantic_type = ctx.get("semanticType") or ""
+        if not (area or target or item or page or nearby):
             continue
-        ctx = json.loads(ev["context_json"])
-        area = ctx.get("formLabel") or ctx.get("sectionLabel")
-        target = ctx.get("targetLabel")
-        if not (area or target):
-            continue
-        key = (ev["host"], _norm_label(area), _norm_label(target))
+        key = (ev["host"], _norm_label(page), _norm_label(item), _norm_label(area), _norm_label(target), _norm_label(nearby), semantic_type)
         counts[key] += 1
         days[key].add(_day(ev["timestamp"]))
     return [
-        {"host": k[0], "area": k[1], "target": k[2], "count": c, "days": len(days[k])}
+        {
+            "host": k[0], "pageTitle": k[1], "itemTitle": k[2],
+            "area": k[3], "target": k[4], "nearbyText": k[5], "semanticType": k[6],
+            "count": c, "days": len(days[k]),
+        }
         for k, c in counts.most_common(20) if c >= 2
     ]
 
 
 def compact_trace(events: list[sqlite3.Row], limit: int = 80) -> list[str]:
-    """Compact recent event trace for the analyst prompt."""
+    """Human-readable, bounded trace that keeps task identity visible."""
     tail = events[-limit:]
     out = []
     for ev in tail:
         detail = json.loads(ev["detail_json"]) if ev["detail_json"] else {}
-        label = detail.get("label") or detail.get("name") or detail.get("key") or detail.get("targetName") or ""
+        ctx = _event_context(ev)
+        site = _friendly_host(ev["host"])
+        item = ctx.get("itemTitle") or ctx.get("pageTitle") or ev["title"] or ""
+        target = ctx.get("targetLabel") or detail.get("label") or detail.get("name") or detail.get("targetName") or ""
+        kind = ctx.get("semanticType")
         ts = datetime.fromtimestamp(ev["timestamp"] / 1000, tz=timezone.utc).strftime("%m-%d %H:%M")
-        out.append(f"{ts} {ev['type']} {ev['host']}{ev['path'] or ''} {label}".strip())
+        if ev["type"] in ("nav", "tabopen"):
+            text = f"{ts} opened {site}"
+            if item: text += f" — {_quoted(item)}"
+        elif ev["type"] == "copy":
+            text = f"{ts} {site} — copied {kind or 'a'} value"
+            if target: text += f" labeled {_quoted(target)}"
+            if item: text += f" from {_quoted(item)}"
+        elif ev["type"] == "paste":
+            text = f"{ts} {site} — pasted"
+            if target: text += f" into {_quoted(target)}"
+            if item: text += f" in {_quoted(item)}"
+        elif ev["type"] == "edit":
+            text = f"{ts} {site} — edited"
+            if target: text += f" {_quoted(target)}"
+            if kind: text += f" ({kind})"
+        elif ev["type"] == "click":
+            text = f"{ts} {site} — interacted with"
+            if target: text += f" {_quoted(target)}"
+            if item: text += f" in {_quoted(item)}"
+        elif ev["type"] == "submit":
+            text = f"{ts} {site} — submitted"
+            if target: text += f" {_quoted(target)}"
+            if item: text += f" in {_quoted(item)}"
+        else:
+            label = target or detail.get("key") or detail.get("depth") or ""
+            text = f"{ts} {ev['type']} {site} {label}".strip()
+        out.append(text[:500])
     return out
