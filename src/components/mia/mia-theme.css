@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/**
+ * MIA design tokens
+ * -----------------------------------------------------------------
+ * Values pulled from the finished Figma Make design
+ * (MIA-Chrome-Extension-Design, src/index.css) — these are the real
+ * colors, not placeholders. Token NAMES are unchanged so MiaAvatar and
+ * mia-personality.ts keep working; only the values moved.
+ *
+ * The two accents still carry the two halves of MIA's personality, and
+ * the Figma avatar keeps that same split:
+ *   --mia-whimsy    -> idle / suggesting / thinking  (light lilac)
+ *   --mia-competent -> confirming / running / success (deep violet)
+ * Never mix them within the same state — see mia-personality.ts.
+ * -----------------------------------------------------------------
+ */
+
+:root {
+  /* Type — Figma: --font-display / --font-body.
+     NOTE: loaded from Google Fonts above. For the packaged extension these
+     should be self-hosted; the system fallbacks below cover it if blocked. */
+  --mia-font-display: 'Fraunces', Georgia, 'Iowan Old Style', serif;
+  --mia-font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Text — Figma: --color-text / --color-text-muted / --color-text-faint */
+  --mia-ink: #13102a;          /* primary text — near-black violet */
+  --mia-ink-soft: #7a6898;     /* secondary text — muted violet */
+  --mia-ink-faint: #b0a4cc;    /* labels, timestamps, status chips */
+
+  /* Surfaces — Figma: --color-bg / --color-bg-2 / --color-card-float */
+  --mia-paper: #fcfaff;        /* base surface — white with a lilac hint */
+  --mia-paper-alt: #f5eefb;    /* secondary surface */
+  --mia-paper-raised: #ffffff; /* cards, raised surfaces — solid white */
+  --mia-border: rgba(180, 165, 220, 0.16);
+
+  /* Personality accents — Figma MiaAvatar orb gradient stops */
+  --mia-whimsy: #b8a8dc;       /* idle / suggesting / thinking — outer */
+  --mia-whimsy-soft: #d8cef4;  /* same states — inner highlight */
+
+  --mia-competent: #7c5cbf;    /* confirming / running / success — outer */
+  --mia-competent-soft: #a888d0;
+
+  --mia-caution: #a899c8;      /* failure only — desaturated, never alarming */
+  --mia-caution-soft: #ccc0e0;
+
+  /* Lilac accent — Figma: --color-lilac* (links, chips, active dots) */
+  --mia-lilac: #8b6cc8;
+  --mia-lilac-light: #c4aee8;
+  --mia-lilac-pale: #ede8f8;
+
+  /* Primary action — Figma: --color-action, deliberately darker than ink */
+  --mia-action: #1a1630;
+  --mia-action-fg: #ffffff;
+
+  /* Gradient mesh stops — Figma: .grad-top */
+  --mia-grad-1: rgba(206, 186, 240, 0.55);
+  --mia-grad-2: rgba(190, 164, 232, 0.38);
+  --mia-grad-mid: #f3ebfb;
+
+  /* Shadow base — Figma shadows are all rgba(80,60,160,a) */
+  --mia-shadow-rgb: 80 60 160;
+
+  /* Motion */
+  --mia-ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+  --mia-ease-snap: cubic-bezier(0.4, 0, 0.2, 1);
+}

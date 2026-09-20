@@ -11,3 +11,10 @@ backend/.env
 # Local data
 backend/data/mia.db
 *.db
+
+# Node / frontend
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store

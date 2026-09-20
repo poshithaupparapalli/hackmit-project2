@@ -1,0 +1,173 @@
+/**
+ * Extension popup styling.
+ *
+ * Structure, spacing and type are taken from the Figma Make design
+ * (MIA-Chrome-Extension-Design → the `Popup` component). Every color is a
+ * var(--mia-*) token from mia-theme.css — no hex values are hardcoded here.
+ */
+
+/* Figma index.css sets this globally — without it the hero's min-height is
+   measured on the content box and the gradient runs 68px too tall. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Figma: width 360, solid white, no radius (Chrome draws the popup chrome). */
+.mia-popup {
+  width: 360px;
+  background: var(--mia-paper-raised);
+  overflow: hidden;
+  font-family: var(--mia-font-body);
+  color: var(--mia-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- gradient hero (Figma: .grad-top) -------------------------------- */
+
+.mia-popup__hero {
+  position: relative;
+  min-height: 200px;
+  padding: 32px 28px 36px;
+  background:
+    radial-gradient(ellipse 70% 60% at 22% 18%, var(--mia-grad-1) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 70% at 82% 78%, var(--mia-grad-2) 0%, transparent 55%),
+    linear-gradient(150deg, #ffffff 0%, var(--mia-grad-mid) 55%, #ffffff 100%);
+  background-size: 180% 180%, 180% 180%, 200% 200%;
+  background-position: 0% 0%, 100% 100%, 0% 50%;
+  animation: mia-grad-drift 14s ease-in-out infinite;
+}
+
+@keyframes mia-grad-drift {
+  0%,
+  100% { background-position: 0% 0%, 100% 100%, 0% 50%; }
+  33%  { background-position: 60% 30%, 40% 70%, 50% 50%; }
+  66%  { background-position: 30% 80%, 80% 20%, 100% 50%; }
+}
+
+.mia-popup__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.mia-popup__wordmark {
+  font-family: var(--mia-font-display);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: var(--mia-ink);
+}
+
+.mia-popup__status {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mia-ink-faint);
+}
+
+.mia-popup__hero-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.mia-popup__hero-line {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--mia-ink-soft);
+}
+
+/* --- white content area ---------------------------------------------- */
+
+.mia-popup__content {
+  padding: 24px 24px 28px;
+  background: var(--mia-paper-raised);
+}
+
+.mia-popup__line {
+  margin: 0 0 20px;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--mia-ink);
+}
+
+.mia-popup__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Primary dark pill (Figma: .btn-dark / DarkBtn) */
+.mia-popup__primary {
+  width: 100%;
+  padding: 9px 22px;
+  border: none;
+  border-radius: 999px;
+  background: var(--mia-action);
+  color: var(--mia-action-fg);
+  font-family: var(--mia-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.mia-popup__primary:hover { opacity: 0.82; }
+.mia-popup__primary:active { opacity: 0.7; }
+
+/* Dismiss — plain text under the primary, centered (Figma) */
+.mia-popup__dismiss {
+  align-self: center;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--mia-ink-soft);
+  font-family: var(--mia-font-body);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.mia-popup__dismiss:hover { opacity: 0.6; }
+
+/* Idle — single lilac text link, centered */
+.mia-popup__idle-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.mia-popup__link {
+  border: none;
+  background: none;
+  color: var(--mia-lilac);
+  font-family: var(--mia-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.mia-popup__link:hover { opacity: 0.7; }
+
+/* Figma: .anim-fade-up */
+.mia-popup__fade-up {
+  animation: mia-fade-up 0.28s ease-out forwards;
+}
+
+@keyframes mia-fade-up {
+  from { transform: translateY(7px); }
+  to { transform: translateY(0); }
+}
