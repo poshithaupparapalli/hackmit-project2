@@ -1,2 +1,466 @@
-:root{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#263a35;background:#f7f8f4;font-size:14px;line-height:1.5;color-scheme:light}*{box-sizing:border-box}body{margin:0;min-width:280px}header{position:sticky;top:0;background:#f7f8f4f5;backdrop-filter:blur(10px);padding:22px 20px 16px;border-bottom:1px solid #dde5dc;z-index:2}.brand{display:flex;gap:12px;align-items:center}.mark{display:grid;place-items:center;width:42px;height:42px;background:#dfeada;border-radius:15px;font:italic 34px Georgia;color:#32563d}h1{font-size:25px;line-height:1;margin:0 0 5px;letter-spacing:-1px}.brand p{font-size:11px;color:#6a776d;margin:0}.observation{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:12px}#observation-status{font-size:13px;font-weight:600}#observation-status::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#3d7a50;margin-right:8px}#observation-status.paused::before{background:#a88036}main{padding:0 20px}section{padding:23px 0;border-bottom:1px solid #e0e6dc}h2{font-size:15px;margin:0 0 12px;font-weight:650}h3{font-size:13px;margin:18px 0 8px}.section-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.section-heading h2{margin:0}.eyebrow{font-size:10px;color:#6b786f;text-transform:uppercase;letter-spacing:.6px}button,input,textarea{font:inherit}button{border:1px solid #cad7cb;background:#fff;color:#324d3c;border-radius:8px;padding:7px 12px;cursor:pointer;white-space:nowrap}button:hover{background:#edf3e9}button:disabled{opacity:.5;cursor:wait}button.primary{background:#365e43;color:#fff;border-color:#365e43}button.primary:hover{background:#284b34}button.quiet{border:0;background:transparent;font-size:12px;padding:4px}button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid #4b7f59;outline-offset:3px}.card{background:white;border:1px solid #dce5d9;border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:0 3px 10px #304b3105}.card h3{font-size:20px;line-height:1.3;font-weight:550;letter-spacing:-.4px;margin:8px 0 12px}.card p{margin:10px 0;color:#596b5d;font-size:13px}.card ul,.card ol{padding-left:20px;font-size:13px;color:#536455}.card li{margin:6px 0}.card .confidence{font-size:11px;color:#72806d;margin-top:16px}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}.actions button{font-size:12px;padding:7px 11px}.card form{margin-top:12px}.card textarea{width:100%;min-height:90px;resize:vertical}.card label{font-size:12px}.notice{background:#eee8d7;color:#756132;padding:10px 12px;border-radius:8px;font-size:12px}.muted,.empty{font-size:13px;color:#6d796f}.footnote{font-size:11px;color:#798176}.activity{padding:0;margin:0;list-style:none}.activity li{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #edf0e9;font-size:12px}.activity time{color:#869081;flex:0 0 42px;font-size:11px}.activity span{overflow-wrap:anywhere}.domains{list-style:none;margin:0 0 14px;padding:0}.domains li{display:flex;align-items:center;justify-content:space-between;font-size:12px;gap:6px;padding:5px 0}.domains span{overflow-wrap:anywhere}.domains button{padding:2px 7px;border:0;background:transparent;font-size:17px;color:#7c8977}label{display:block;color:#687761;font-size:11px;margin-bottom:6px}.input-row{display:flex;gap:7px}input,textarea{background:#fff;border:1px solid #d7e0d3;border-radius:8px;padding:9px;min-width:0}input{width:100%;font-size:12px}details{padding:15px 0;font-size:12px;color:#66765f}summary{cursor:pointer}dl{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px}dd{margin:0;overflow-wrap:anywhere}pre{max-height:260px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px;background:#edf1e8;padding:10px}footer{text-align:center;font-size:12px;color:#567052;padding:25px 18px}footer span{color:#86917e;font-size:10px}#message{border-left:3px solid #648456;padding:8px 10px;background:#eaf0e5;font-size:12px;overflow-wrap:anywhere}#message.error{border-color:#a55548;background:#f7eae5;color:#894b3e}[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
-:focus{scroll-margin-top:160px}.activity time{flex-basis:56px;white-space:nowrap}.card h3{overflow-wrap:anywhere}
+/**
+ * Mia side panel — visual layer.
+ *
+ * Restyled to the finished Figma Make design (MIA-Chrome-Extension-Design).
+ * Every selector sidepanel.js touches is preserved; only presentation changed.
+ * All color comes from mia-theme.css tokens — no palette is forked here.
+ */
+
+* { box-sizing: border-box; }
+
+:root {
+  font-family: var(--mia-font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--mia-ink);
+  background: var(--mia-paper);
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-width: 280px;
+  background:
+    radial-gradient(ellipse 60% 45% at 12% 6%, rgba(206, 184, 238, 0.2) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 58% at 88% 94%, rgba(214, 194, 240, 0.16) 0%, transparent 55%),
+    linear-gradient(170deg, #ffffff 0%, #f8f3fd 60%, #ffffff 100%);
+  background-attachment: fixed;
+}
+
+/* ── header ──────────────────────────────────────────────────────────── */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid var(--mia-border);
+  background:
+    radial-gradient(ellipse 70% 60% at 22% 18%, var(--mia-grad-1) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 70% at 82% 78%, var(--mia-grad-2) 0%, transparent 55%),
+    linear-gradient(150deg, #ffffff 0%, var(--mia-grad-mid) 55%, #ffffff 100%);
+  backdrop-filter: blur(10px);
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Figma MiaIcon — rounded square, gradient fill, display face */
+.mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: linear-gradient(150deg, #ffffff 0%, var(--mia-grad-mid) 55%, var(--mia-lilac-light) 100%);
+  box-shadow: 0 4px 16px rgb(var(--mia-shadow-rgb) / 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  font-family: var(--mia-font-display);
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--mia-ink);
+}
+
+h1 {
+  margin: 0 0 4px;
+  font-family: var(--mia-font-display);
+  font-weight: 900;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--mia-ink);
+}
+
+.brand p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--mia-ink-soft);
+}
+
+/* Observing pill — Figma dashboard header indicator */
+.observation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 6px 8px 6px 13px;
+  border: 1px solid rgba(139, 108, 200, 0.28);
+  border-radius: 999px;
+  background: rgba(139, 108, 200, 0.1);
+}
+
+#observation-status {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--mia-ink);
+}
+
+#observation-status::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--mia-lilac);
+}
+
+#observation-status.paused::before { background: var(--mia-lilac-light); }
+
+#pause {
+  padding: 3px 12px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--mia-ink-soft);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#pause:hover { background: #ffffff; }
+
+/* ── layout ──────────────────────────────────────────────────────────── */
+
+main { padding: 0 20px; }
+
+section {
+  padding: 23px 0;
+  border-bottom: 1px solid var(--mia-border);
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-family: var(--mia-font-display);
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--mia-ink);
+}
+
+h3 {
+  margin: 18px 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mia-ink);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.section-heading h2 { margin: 0; }
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mia-ink-faint);
+}
+
+/* ── buttons — Figma pills ───────────────────────────────────────────── */
+
+button,
+input,
+textarea { font: inherit; }
+
+button {
+  padding: 8px 18px;
+  border: 1px solid rgba(200, 190, 230, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--mia-ink-soft);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+button:hover { background: rgba(255, 255, 255, 0.85); }
+button:disabled { opacity: 0.5; cursor: wait; }
+
+button.primary {
+  border: none;
+  background: var(--mia-action);
+  color: var(--mia-action-fg);
+  font-weight: 600;
+}
+
+button.primary:hover { background: var(--mia-action); opacity: 0.82; }
+
+button.quiet {
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--mia-lilac);
+  font-size: 12px;
+}
+
+button.quiet:hover { background: transparent; opacity: 0.7; }
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--mia-lilac);
+  outline-offset: 3px;
+}
+
+/* ── suggestion cards ────────────────────────────────────────────────── */
+
+.card {
+  margin-bottom: 12px;
+  padding: 20px;
+  border: 1px solid rgba(200, 190, 230, 0.18);
+  border-radius: 20px;
+  background: var(--mia-paper-raised);
+  box-shadow:
+    0 1px 2px rgb(var(--mia-shadow-rgb) / 0.04),
+    0 6px 24px rgb(var(--mia-shadow-rgb) / 0.08),
+    0 16px 48px rgb(var(--mia-shadow-rgb) / 0.06);
+}
+
+.card h3 {
+  margin: 10px 0 12px;
+  font-family: var(--mia-font-display);
+  font-weight: 900;
+  font-size: 19px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--mia-ink);
+  overflow-wrap: anywhere;
+}
+
+.card p {
+  margin: 10px 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--mia-ink-soft);
+}
+
+.card ul,
+.card ol {
+  padding-left: 20px;
+  font-size: 13px;
+  color: var(--mia-ink-soft);
+}
+
+.card li { margin: 6px 0; }
+
+.card .confidence {
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--mia-ink-faint);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.actions button {
+  padding: 7px 16px;
+  font-size: 12.5px;
+}
+
+.card form { margin-top: 12px; }
+.card label { font-size: 12px; }
+
+.card textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+}
+
+/* ── notices ─────────────────────────────────────────────────────────── */
+
+.notice {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--mia-lilac-pale);
+  color: var(--mia-ink-soft);
+  font-size: 12px;
+}
+
+.muted,
+.empty {
+  font-size: 13px;
+  color: var(--mia-ink-soft);
+}
+
+.footnote {
+  font-size: 11px;
+  color: var(--mia-ink-faint);
+}
+
+#message {
+  padding: 9px 12px;
+  border-left: 3px solid var(--mia-lilac);
+  border-radius: 0 10px 10px 0;
+  background: var(--mia-lilac-pale);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+#message.error {
+  border-color: var(--mia-caution);
+  background: rgba(168, 153, 200, 0.16);
+  color: var(--mia-ink);
+}
+
+/* ── activity ────────────────────────────────────────────────────────── */
+
+.activity {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.activity li {
+  display: flex;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--mia-border);
+  font-size: 12px;
+  color: var(--mia-ink);
+}
+
+.activity time {
+  flex: 0 0 56px;
+  white-space: nowrap;
+  font-size: 11px;
+  color: var(--mia-ink-faint);
+}
+
+.activity span { overflow-wrap: anywhere; }
+
+/* ── excluded domains ────────────────────────────────────────────────── */
+
+.domains {
+  margin: 0 0 14px;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.domains li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 5px 13px;
+  border-radius: 999px;
+  background: var(--mia-lilac-pale);
+  font-size: 13px;
+  color: var(--mia-ink-soft);
+}
+
+.domains span { overflow-wrap: anywhere; }
+
+.domains button {
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--mia-ink-faint);
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ── forms ───────────────────────────────────────────────────────────── */
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: var(--mia-ink-soft);
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+}
+
+input,
+textarea {
+  min-width: 0;
+  padding: 9px 14px;
+  border: 1px solid rgba(180, 165, 220, 0.28);
+  border-radius: 12px;
+  background: rgba(245, 240, 252, 0.8);
+  color: var(--mia-ink);
+  outline: none;
+}
+
+input {
+  width: 100%;
+  font-size: 13px;
+}
+
+/* ── diagnostics ─────────────────────────────────────────────────────── */
+
+details {
+  padding: 15px 0;
+  font-size: 12px;
+  color: var(--mia-ink-soft);
+}
+
+summary { cursor: pointer; }
+
+dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 11px;
+}
+
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+pre {
+  max-height: 260px;
+  padding: 10px;
+  overflow: auto;
+  border-radius: 12px;
+  background: var(--mia-lilac-pale);
+  font-size: 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ── footer ──────────────────────────────────────────────────────────── */
+
+footer {
+  padding: 25px 18px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--mia-ink-soft);
+}
+
+footer span {
+  font-size: 10px;
+  color: var(--mia-ink-faint);
+}
+
+[hidden] { display: none !important; }
+
+:focus { scroll-margin-top: 160px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto; }
+}
