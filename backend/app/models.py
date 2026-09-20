@@ -64,7 +64,7 @@ class InstallResponse(BaseModel):
     installToken: str
 
 
-WorkflowKey = Literal["gmail_to_sheet", "email_to_calendar"]
+WorkflowKey = Literal["gmail_to_sheet", "email_to_calendar", "inbox_triage"]
 SuggestionKind = Literal["workflow", "automation", "rule"]
 SuggestionStatus = Literal["proposed", "accepted", "dismissed", "built"]
 # How an accepted, runnable suggestion behaves once auto-run finds new
